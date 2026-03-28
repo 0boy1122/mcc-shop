@@ -26,7 +26,7 @@ async function main() {
     create: {
       name: "Test Customer",
       phone: "0200000002",
-      email: "customer@test.com",
+      email: "client@test.com",
       password: customerPassword,
       role: "CUSTOMER",
     },
@@ -62,6 +62,7 @@ async function main() {
       sellingPrice: 780,
       bulkThreshold: 5,
       dispatchMode: "VAN",
+      images: "/emulsion_paint.png",
       mvpPriority: true,
     },
     {
@@ -73,6 +74,7 @@ async function main() {
       sellingPrice: 220,
       bulkThreshold: 10,
       dispatchMode: "BIKE",
+      images: "/oil_paint.png",
       mvpPriority: true,
     },
     {
@@ -84,6 +86,7 @@ async function main() {
       sellingPrice: 38,
       bulkThreshold: 20,
       dispatchMode: "BIKE",
+      images: "/silicon_sealant.png",
       mvpPriority: true,
     },
     {
@@ -95,6 +98,7 @@ async function main() {
       sellingPrice: 75,
       bulkThreshold: 10,
       dispatchMode: "BIKE",
+      images: "/helmet.png",
       mvpPriority: true,
     },
     {
@@ -106,6 +110,7 @@ async function main() {
       sellingPrice: 40,
       bulkThreshold: 20,
       dispatchMode: "BIKE",
+      images: "/trowel.png",
       mvpPriority: true,
     },
     {
@@ -117,6 +122,7 @@ async function main() {
       sellingPrice: 28,
       bulkThreshold: 50,
       dispatchMode: "BIKE",
+      images: "/led_bulb.png",
       mvpPriority: true,
     },
     {
@@ -128,6 +134,7 @@ async function main() {
       sellingPrice: 160,
       bulkThreshold: 5,
       dispatchMode: "BIKE",
+      images: "/faucet.png",
       mvpPriority: true,
     },
     {
@@ -139,6 +146,7 @@ async function main() {
       sellingPrice: 190,
       bulkThreshold: 5,
       dispatchMode: "BIKE",
+      images: "/locks.png",
       mvpPriority: true,
     },
     {
@@ -150,6 +158,7 @@ async function main() {
       sellingPrice: 820,
       bulkThreshold: 2,
       dispatchMode: "VAN",
+      images: "/office_chairs.jpeg",
       mvpPriority: true,
     },
     {
@@ -161,6 +170,7 @@ async function main() {
       sellingPrice: 115,
       bulkThreshold: 50,
       dispatchMode: "PICKUP",
+      images: "/ceiling_panel.jpeg",
       mvpPriority: true,
     },
   ];
@@ -168,26 +178,17 @@ async function main() {
   for (const product of products) {
     await prisma.product.upsert({
       where: { skuCode: product.skuCode },
-      update: {},
-      create: {
-        ...product,
-        stockQty: 100,
-        vatIncluded: true,
-        isPublished: true,
-        images: "",
-      },
+      update: product,
+      create: product,
     });
   }
 
-  console.log("✅ Seeding complete!");
-  console.log("   Admin:    phone=0200000001  password=admin123");
-  console.log("   Customer: phone=0200000002  password=customer123");
-  console.log("   Rider:    phone=0200000003  password=rider123");
+  console.log("✅ Database seeded successfully!");
 }
 
 main()
   .catch((e) => {
-    console.error(e);
+    console.error("❌ Seed error: ", e);
     process.exit(1);
   })
   .finally(async () => {
