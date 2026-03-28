@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard | The MCC Shop</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700;9..144,900&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --sage: #2E8B65;
+      --sage2: #3DA176;
+      --ink: #0A120E;
+      --ink2: #0D1A12;
+      --border: rgba(255,255,255,0.06);
+      --t1: #F8FAFB;
+      --t2: rgba(255,255,255,0.7);
+      --t3: rgba(255,255,255,0.4);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background-color: var(--ink);
+      color: var(--t1);
+      font-family: 'Outfit', sans-serif;
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 280px;
+      background: var(--ink2);
+      border-right: 1px solid var(--border);
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      height: 100vh;
+    }
+
+    .logo {
+      font-family: 'Fraunces', serif;
+      font-weight: 900;
+      font-size: 24px;
+      color: var(--sage);
+      margin-bottom: 48px;
+    }
+
+    .nav-menu {
+      flex: 1;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: 12px;
+      color: var(--t2);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+      margin-bottom: 8px;
+      cursor: pointer;
+    }
+
+    .nav-item:hover {
+      background: rgba(255,255,255,0.03);
+      color: white;
+    }
+
+    .nav-item.active {
+      background: rgba(46,139,101,0.1);
+      color: var(--sage2);
+    }
+
+    .nav-item svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+    }
+
+    .sidebar-footer {
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+    }
+
+    .logout-btn {
+      color: #ff7676;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    /* Main Content */
+    .main-content {
+      margin-left: 280px;
+      flex: 1;
+      padding: 48px 64px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 48px;
+    }
+
+    h1 {
+      font-family: 'Fraunces', serif;
+      font-size: 32px;
+      font-weight: 900;
+    }
+
+    .btn-primary {
+      background: var(--sage);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 24px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Table Styles */
+    .card {
+      background: var(--ink2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th {
+      text-align: left;
+      padding: 20px 24px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--t3);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 20px 24px;
+      font-size: 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--t2);
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    .sku-badge {
+      font-family: monospace;
+      background: rgba(255,255,255,0.05);
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+    }
+
+    .status-pill {
+      padding: 4px 12px;
+      border-radius: 100px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .status-published { background: rgba(46, 139, 101, 0.15); color: var(--sage2); }
+    .status-draft { background: rgba(255,255,255,0.05); color: var(--t3); }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .action-btn {
+      background: none;
+      border: none;
+      color: var(--t3);
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .action-btn:hover { color: white; }
+
+    /* Loading Overlay */
+    #loading {
+      position: fixed;
+      inset: 0;
+      background: var(--ink);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+  <div id="loading">Loading...</div>
+
+  <div class="sidebar">
+    <div class="logo">MCC SHOP</div>
+    <div class="nav-menu">
+      <div class="nav-item active" onclick="switchTab(this, 'overview')">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Overview
+      </div>
+      <div class="nav-item" onclick="switchTab(this, 'inventory')">
+        <svg viewBox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+        Inventory
+      </div>
+      <div class="nav-item" onclick="switchTab(this, 'orders')">
+        <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        Orders
+      </div>
+      <div class="nav-item" onclick="switchTab(this, 'users')">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        Users
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="logout-btn" onclick="logout()">
+        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Logout
+      </div>
+    </div>
+  </div>
+
+  <main class="main-content">
+    <header>
+      <h1>Inventory</h1>
+      <button class="btn-primary" onclick="openCreateModal()">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Create Product
+      </button>
+    </header>
+
+    <div class="card" id="view-inventory" style="display:none;">
+      <table id="productTable">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>SKU</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>Stock</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="productBody">
+          <!-- Products will be loaded here -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Orders View -->
+    <div class="card" id="view-orders" style="display:none;">
+      <table id="ordersTable">
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Customer</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="ordersBody">
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Overview View -->
+    <div id="view-overview" style="display:none;">
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:24px; margin-bottom:24px;">
+        <div class="card" style="padding:24px; text-align:center;">
+          <div style="color:var(--t3); font-size:12px; text-transform:uppercase; font-weight:600; margin-bottom:8px;">Total Revenue</div>
+          <div id="stat-rev" style="font-size:32px; font-weight:700; color:white;">GHS 0</div>
+        </div>
+        <div class="card" style="padding:24px; text-align:center;">
+          <div style="color:var(--t3); font-size:12px; text-transform:uppercase; font-weight:600; margin-bottom:8px;">Total Orders</div>
+          <div id="stat-ords" style="font-size:32px; font-weight:700; color:white;">0</div>
+        </div>
+        <div class="card" style="padding:24px; text-align:center;">
+          <div style="color:var(--t3); font-size:12px; text-transform:uppercase; font-weight:600; margin-bottom:8px;">Pending Orders</div>
+          <div id="stat-pend" style="font-size:32px; font-weight:700; color:var(--sage2);">0</div>
+        </div>
+        <div class="card" style="padding:24px; text-align:center;">
+          <div style="color:var(--t3); font-size:12px; text-transform:uppercase; font-weight:600; margin-bottom:8px;">Registered Users</div>
+          <div id="stat-users" style="font-size:32px; font-weight:700; color:white;">0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Users View -->
+    <div class="card" id="view-users" style="display:none;">
+      <table id="usersTable">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Role</th>
+            <th>Joined</th>
+          </tr>
+        </thead>
+        <tbody id="usersBody">
+        </tbody>
+      </table>
+    </div>
+
+    <div id="view-placeholder" style="display:none; padding:40px; text-align:center; color:var(--t3);">
+      Feature not available yet.
+    </div>
+  </main>
+
+  <!-- Product Modal -->
+  <div id="productModal" class="modal-overlay" onclick="handleModalClick(event)">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 id="modalTitle">Create New Product</h2>
+        <button class="close-btn" onclick="closeModal()">✕</button>
+      </div>
+      <form id="productForm">
+        <input type="hidden" id="productId">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Product Name</label>
+            <input type="text" id="pName" required placeholder="e.g. Emulsion Paint">
+          </div>
+          <div class="form-group">
+            <label>SKU Code</label>
+            <input type="text" id="pSku" required placeholder="e.g. PNT-001">
+          </div>
+          <div class="form-group">
+            <label>Category</label>
+            <select id="pCat" required>
+              <option value="Paints">Paints</option>
+              <option value="Adhesives">Adhesives</option>
+              <option value="Safety">Safety</option>
+              <option value="Tools">Tools</option>
+              <option value="Electrical">Electrical</option>
+              <option value="Plumbing">Plumbing</option>
+              <option value="Hardware">Hardware</option>
+              <option value="Office">Office</option>
+              <option value="Panels">Panels</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Unit Size</label>
+            <input type="text" id="pUnit" required placeholder="e.g. 5 Gallon">
+          </div>
+          <div class="form-group">
+            <label>Cost Price (GHS)</label>
+            <input type="number" id="pCost" required step="0.01" oninput="calcMargin()">
+          </div>
+          <div class="form-group">
+            <label>Selling Price (VAT Incl.)</label>
+            <input type="number" id="pSell" required step="0.01" oninput="calcMargin()">
+          </div>
+          <div class="form-group">
+            <label>Dispatch Mode</label>
+            <select id="pMode" required>
+              <option value="BIKE">Bike 🏍️</option>
+              <option value="VAN">Van 🚐</option>
+              <option value="PICKUP">Pickup 🛻</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Stock Quantity</label>
+            <input type="number" id="pStock" value="100">
+          </div>
+          <div class="form-group">
+            <label>Bulk Minimum Qty</label>
+            <input type="number" id="pBulk" value="5">
+          </div>
+          <div class="form-group" style="grid-column: span 2; display: flex; gap: 32px; padding: 12px 16px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px;">
+            <label style="display: flex; align-items: center; gap: 12px; margin: 0; font-size: 13px; text-transform: none; cursor: pointer; color: white;">
+              <input type="checkbox" id="pFragile" style="width: 20px; height: 20px; margin: 0; outline: none; accent-color: var(--sage);">
+              Handle as Fragile Item
+            </label>
+            <label style="display: flex; align-items: center; gap: 12px; margin: 0; font-size: 13px; text-transform: none; cursor: pointer; color: white;">
+              <input type="checkbox" id="pHazardous" style="width: 20px; height: 20px; margin: 0; outline: none; accent-color: #ff7676;">
+              Hazardous / Flammable / Chemical
+            </label>
+          </div>
+          <div class="form-group" style="grid-column: span 2;">
+            <label>Product Image</label>
+            <div style="display: flex; gap: 16px; align-items: center; margin-top: 8px;">
+              <div id="imgPreview" style="width: 80px; height: 80px; background: rgba(255,255,255,0.05); border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid var(--border);">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="var(--t3)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              </div>
+              <input type="file" id="pImage" accept="image/*" style="flex: 1;" onchange="previewImage(this)">
+              <input type="hidden" id="pImageUrl">
+            </div>
+          </div>
+        </div>
+        
+        <div class="margin-preview">
+          Estimated Margin: <span id="pMargin">0%</span>
+        </div>
+
+        <div class="footer-actions">
+          <button type="button" class="btn-ghost" onclick="closeModal()">Cancel</button>
+          <button type="submit" class="btn-primary">Save Product</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <style>
+    /* Additional Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1100;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-card {
+      background: var(--ink2);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      width: 100%;
+      max-width: 600px;
+      padding: 40px;
+      position: relative;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+    }
+    .close-btn { background: none; border: none; color: var(--t3); cursor: pointer; font-size: 20px; }
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    .form-group label { display: block; font-size: 11px; font-weight: 600; color: var(--t3); text-transform: uppercase; margin-bottom: 8px; }
+    .form-group input, .form-group select {
+      width: 100%; background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px 16px; color: white; font-family: inherit; outline: none;
+    }
+    .form-group input:focus { border-color: var(--sage); background: rgba(46,139,101,0.05); }
+    .margin-preview {
+      margin: 24px 0; padding: 16px; background: rgba(46,139,101,0.1); border-radius: 12px;
+      text-align: center; font-weight: 600; color: var(--sage2); border: 1px dashed var(--sage);
+    }
+    .footer-actions { display: flex; justify-content: flex-end; gap: 16px; margin-top: 32px; }
+    .btn-ghost { background: none; border: 1px solid var(--border); color: white; border-radius: 10px; padding: 12px 24px; cursor: pointer; }
+    /* Status Select Enhancement */
+    .status-select {
+        background: rgba(46,139,101,0.15) !important;
+        color: var(--sage2) !important;
+        border: 1px solid var(--sage) !important;
+        border-radius: 8px;
+        padding: 6px 12px;
+        font-size: 11px;
+        font-weight: 700;
+        cursor: pointer;
+        outline: none;
+        transition: 0.2s;
+    }
+    .status-select:hover { background: rgba(46,139,101,0.25) !important; }
+    .status-select option { background: var(--ink2); color: white; }
+  </style>
+
+  <script>
+    const API_URL = '/api';
+    const token = localStorage.getItem('mcc_token');
+
+    if (!token) {
+      window.location.href = 'admin_login.html';
+    }
+
+    async function loadProducts() {
+      try {
+        const res = await fetch(`${API_URL}/admin/products`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        const products = data.products || [];
+        
+        const body = document.getElementById('productBody');
+        body.innerHTML = products.map(p => `
+          <tr>
+            <td style="font-weight:600; color:white;">${p.name}</td>
+            <td><span class="sku-badge">${p.skuCode}</span></td>
+            <td>${p.category}</td>
+            <td>GHS ${p.sellingPrice.toLocaleString()}</td>
+            <td>${p.stockQty}</td>
+            <td><span class="status-pill ${p.isPublished ? 'status-published' : 'status-draft'}">${p.isPublished ? 'PUBLISHED' : 'DRAFT'}</span></td>
+            <td>
+              <div class="actions">
+                <button class="action-btn" onclick="editProduct('${p.id}')"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 113 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                <button class="action-btn" onclick="deleteProduct('${p.id}')" style="color:#ff7676"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>
+              </div>
+            </td>
+          </tr>
+        `).join('');
+        
+        document.getElementById('loading').style.display = 'none';
+      } catch (err) {
+        console.error('Failed to load products', err);
+        document.getElementById('loading').style.display = 'none';
+      }
+    }
+
+    function switchTab(el, tabId) {
+      document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+      el.classList.add('active');
+      
+      const main = document.querySelector('.main-content h1');
+      document.getElementById('view-inventory').style.display = 'none';
+      document.getElementById('view-orders').style.display = 'none';
+      document.getElementById('view-overview').style.display = 'none';
+      document.getElementById('view-users').style.display = 'none';
+      document.getElementById('view-placeholder').style.display = 'none';
+      document.querySelector('.btn-primary').style.display = 'none';
+
+      main.textContent = tabId.charAt(0).toUpperCase() + tabId.slice(1);
+      
+      if (tabId === 'inventory') {
+          document.getElementById('view-inventory').style.display = 'block';
+          document.querySelector('.btn-primary').style.display = 'flex';
+          loadProducts();
+      } else if (tabId === 'orders') {
+          document.getElementById('view-orders').style.display = 'block';
+          loadOrders();
+      } else if (tabId === 'overview') {
+          document.getElementById('view-overview').style.display = 'block';
+          loadOverview();
+      } else if (tabId === 'users') {
+          document.getElementById('view-users').style.display = 'block';
+          loadUsers();
+      } else {
+          document.getElementById('view-placeholder').style.display = 'block';
+      }
+    }
+
+    async function loadOverview() {
+      document.getElementById('loading').style.display = 'flex';
+      try {
+        const res = await fetch(`${API_URL}/admin/analytics`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const data = await res.json();
+        document.getElementById('stat-rev').textContent = 'GHS ' + (data.totalRevenue || 0).toLocaleString();
+        document.getElementById('stat-ords').textContent = data.totalOrders || 0;
+        document.getElementById('stat-pend').textContent = data.pendingOrders || 0;
+        document.getElementById('stat-users').textContent = data.totalUsers || 0;
+      } catch(err){ console.error(err); }
+      document.getElementById('loading').style.display = 'none';
+    }
+
+    async function loadUsers() {
+      document.getElementById('loading').style.display = 'flex';
+      try {
+        const res = await fetch(`${API_URL}/admin/users`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const data = await res.json();
+        const users = data.users || [];
+        document.getElementById('usersBody').innerHTML = users.map(u => `
+          <tr>
+            <td style="font-weight:600; color:white;">${u.name}</td>
+            <td>${u.phone}</td>
+            <td><span class="sku-badge" style="background:${u.role==='CUSTOMER'?'rgba(255,255,255,0.05)':'rgba(46,139,101,0.2)'}">${u.role}</span></td>
+            <td style="font-size:12px;">${new Date(u.createdAt).toLocaleDateString()}</td>
+          </tr>
+        `).join('');
+      } catch(err){ console.error(err); }
+      document.getElementById('loading').style.display = 'none';
+    }
+
+    async function loadOrders() {
+      document.getElementById('loading').style.display = 'flex';
+      try {
+        const res = await fetch(`${API_URL}/admin/orders`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        const orders = data.orders || [];
+        
+        const body = document.getElementById('ordersBody');
+        body.innerHTML = orders.map(o => `
+          <tr>
+            <td style="font-family:monospace; color:var(--t2); font-size:12px;">${o.id.split('-')[0]}</td>
+            <td style="font-weight:600; color:white;">
+              ${o.user ? o.user.name : 'Unknown'}<br>
+              <span style="font-size:11px; color:var(--t3); font-weight:400;">${o.user ? o.user.phone : ''}</span>
+            </td>
+            <td>GHS ${o.total.toLocaleString()}</td>
+            <td>
+              <select class="status-select" onchange="updateOrderStatus('${o.id}', this.value)">
+                <option value="PENDING" ${o.status==='PENDING'?'selected':''}>PENDING</option>
+                <option value="CONFIRMED" ${o.status==='CONFIRMED'?'selected':''}>CONFIRMED</option>
+                <option value="DISPATCHED" ${o.status==='DISPATCHED'?'selected':''}>DISPATCHED</option>
+                <option value="DELIVERED" ${o.status==='DELIVERED'?'selected':''}>DELIVERED</option>
+                <option value="CANCELLED" ${o.status==='CANCELLED'?'selected':''}>CANCELLED</option>
+              </select>
+            </td>
+            <td style="font-size:12px;">${new Date(o.createdAt).toLocaleString()}</td>
+            <td>
+              <button class="action-btn" onclick="alert('View full order details not implemented yet!')">View</button>
+            </td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        console.error('Failed to load orders', err);
+      }
+      document.getElementById('loading').style.display = 'none';
+    }
+
+    async function updateOrderStatus(id, status) {
+      if(!confirm('Update order status to ' + status + '?')) return loadOrders();
+      try {
+        const res = await fetch(`${API_URL}/orders/${id}/status`, {
+          method: 'PATCH',
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status })
+        });
+        if(res.ok) loadOrders();
+        else {
+          const err = await res.json();
+          alert("Error: " + err.error);
+          loadOrders();
+        }
+      } catch (err) {
+        console.error("Status update failed:", err);
+      }
+    }
+
+    async function deleteProduct(id) {
+        if (!confirm('Are you sure you want to unpublish this product?')) return;
+        try {
+            const res = await fetch(`${API_URL}/admin/products/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) loadProducts();
+        } catch (err) {
+            console.error('Deletion failed');
+        }
+    }
+
+    async function editProduct(id) {
+      document.getElementById('modalTitle').textContent = 'Edit Product';
+      document.getElementById('productModal').classList.add('open');
+      
+      try {
+        const res = await fetch(`${API_URL}/products/${id}`);
+        const { product } = await res.json();
+        
+        document.getElementById('productId').value = product.id;
+        document.getElementById('pName').value = product.name;
+        document.getElementById('pSku').value = product.skuCode || '';
+        document.getElementById('pCat').value = product.category;
+        document.getElementById('pUnit').value = product.unitSize;
+        document.getElementById('pCost').value = product.costPrice;
+        document.getElementById('pSell').value = product.sellingPrice;
+        document.getElementById('pMode').value = product.dispatchMode;
+        document.getElementById('pStock').value = product.stockQty;
+        document.getElementById('pBulk').value = product.bulkThreshold;
+        document.getElementById('pFragile').checked = product.isFragile;
+        document.getElementById('pHazardous').checked = product.isHazardous;
+        
+        const imageUrl = product.images || '';
+        document.getElementById('pImageUrl').value = imageUrl;
+        if (imageUrl) {
+          document.getElementById('imgPreview').innerHTML = `<img src="${imageUrl}" style="width:100%;height:100%;object-fit:cover;">`;
+        } else {
+          document.getElementById('imgPreview').innerHTML = '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="var(--t3)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>';
+        }
+
+        calcMargin();
+      } catch (err) {
+        console.error('Failed to fetch product');
+      }
+    }
+
+    function openCreateModal() {
+      document.getElementById('modalTitle').textContent = 'Create New Product';
+      document.getElementById('productForm').reset();
+      document.getElementById('productId').value = '';
+      document.getElementById('pImageUrl').value = '';
+      document.getElementById('pFragile').checked = false;
+      document.getElementById('pHazardous').checked = false;
+      document.getElementById('imgPreview').innerHTML = '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="var(--t3)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>';
+      document.getElementById('productModal').classList.add('open');
+    }
+
+    function previewImage(input) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          document.getElementById('imgPreview').innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;">`;
+        };
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+
+    function closeModal() {
+      document.getElementById('productModal').classList.remove('open');
+    }
+
+    function handleModalClick(e) {
+      if (e.target === document.getElementById('productModal')) closeModal();
+    }
+
+    function calcMargin() {
+      const cost = parseFloat(document.getElementById('pCost').value) || 0;
+      const sell = parseFloat(document.getElementById('pSell').value) || 0;
+      if (cost > 0) {
+        const margin = ((sell - cost) / sell) * 100;
+        document.getElementById('pMargin').textContent = margin.toFixed(1) + '%';
+        document.getElementById('pMargin').style.color = (margin >= 8 && margin <= 20) ? '#3DA176' : '#ff7676';
+      }
+    }
+
+    document.getElementById('productForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('productId').value;
+      const saveBtn = e.target.querySelector('[type="submit"]');
+      saveBtn.textContent = 'Saving...';
+      saveBtn.disabled = true;
+
+      // Upload image first if a file was selected
+      const imgFile = document.getElementById('pImage').files[0];
+      let imageUrl = document.getElementById('pImageUrl').value || '';
+      if (imgFile) {
+        const formData = new FormData();
+        formData.append('image', imgFile);
+        try {
+          const imgRes = await fetch(`${API_URL}/admin/products/upload`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` },
+            body: formData
+          });
+          const imgData = await imgRes.json();
+          if (imgData.url) imageUrl = imgData.url;
+          else if (imgData.error) throw new Error(imgData.error);
+        } catch (err) {
+          console.warn('Image upload failed', err);
+          alert('Image upload failed: ' + (err.message || 'The photo might be too large or unsupported.'));
+          saveBtn.textContent = 'Save Product';
+          saveBtn.disabled = false;
+          return;
+        }
+      }
+
+      const productData = {
+        name: document.getElementById('pName').value,
+        skuCode: document.getElementById('pSku').value,
+        category: document.getElementById('pCat').value,
+        unitSize: document.getElementById('pUnit').value,
+        costPrice: parseFloat(document.getElementById('pCost').value),
+        sellingPrice: parseFloat(document.getElementById('pSell').value),
+        dispatchMode: document.getElementById('pMode').value,
+        stockQty: parseInt(document.getElementById('pStock').value),
+        bulkThreshold: parseInt(document.getElementById('pBulk').value || 5),
+        isFragile: document.getElementById('pFragile').checked,
+        isHazardous: document.getElementById('pHazardous').checked,
+        isPublished: true,
+        vatIncluded: true,
+        images: imageUrl
+      };
+
+      try {
+        const method = id ? 'PUT' : 'POST';
+        const url = id ? `${API_URL}/admin/products/${id}` : `${API_URL}/admin/products`;
+
+        const res = await fetch(url, {
+          method,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(productData)
+        });
+
+        if (res.ok) {
+          closeModal();
+          loadProducts();
+        } else {
+          const err = await res.json();
+          alert('Error: ' + err.error);
+          saveBtn.textContent = 'Save Product';
+          saveBtn.disabled = false;
+        }
+      } catch (err) {
+        console.error('Submission failed', err);
+        saveBtn.textContent = 'Save Product';
+        saveBtn.disabled = false;
+      }
+    });
+
+    function logout() {
+      localStorage.removeItem('mcc_token');
+      localStorage.removeItem('mcc_user');
+      window.location.href = 'portal_login.html';
+    }
+
+    // Start with Overview automatically
+    const defaultNav = document.querySelector('.nav-item');
+    if(defaultNav) switchTab(defaultNav, 'overview');
+  </script>
+</body>
+</html>

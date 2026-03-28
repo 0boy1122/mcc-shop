@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rider Portal | The MCC Shop</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700;9..144,900&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --sage: #2E8B65;
+      --sage2: #3DA176;
+      --ink: #0A120E;
+      --ink2: #0D1A12;
+      --mist: rgba(255,255,255,0.05);
+      --border: rgba(255,255,255,0.1);
+      --white: #FFFFFF;
+      --t1: #F8FAFB;
+      --t2: rgba(255,255,255,0.7);
+      --t3: rgba(255,255,255,0.4);
+      --accent: #25D366;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background-color: var(--ink);
+      color: var(--t1);
+      font-family: 'Outfit', sans-serif;
+      padding-bottom: 80px;
+    }
+
+    header {
+      padding: 24px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--ink2);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .rider-info { display: flex; align-items: center; gap: 12px; }
+    .avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--sage); display: flex; align-items: center; justify-content: center; font-weight: 700; }
+    .name { font-size: 16px; font-weight: 600; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: inline-block; margin-right: 4px; }
+
+    .container { padding: 20px; max-width: 600px; margin: 0 auto; }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--mist);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+    }
+    .stat-val { font-size: 24px; font-weight: 700; color: var(--sage); }
+    .stat-lab { font-size: 11px; color: var(--t3); text-transform: uppercase; margin-top: 4px; }
+
+    .section-title {
+      font-family: 'Fraunces', serif;
+      font-size: 20px;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .order-card {
+      background: var(--ink2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 20px;
+      margin-bottom: 16px;
+      transition: transform 0.2s;
+    }
+    .order-header { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 13px; color: var(--t3); }
+    .order-id { font-weight: 700; color: var(--sage); }
+    .order-address { font-size: 15px; font-weight: 500; margin-bottom: 8px; color: white; }
+    .order-items { font-size: 13px; color: var(--t2); margin-bottom: 16px; line-height: 1.4; }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      border: none;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: 0.2s;
+    }
+    .btn-primary { background: var(--sage); color: white; }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--t2); }
+    .btn:active { transform: scale(0.98); }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--t3);
+    }
+
+    .nav-bar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: var(--ink2);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-around;
+      padding: 12px;
+      backdrop-filter: blur(10px);
+    }
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--t3);
+      font-size: 10px;
+      text-decoration: none;
+    }
+    .nav-item.active { color: var(--sage); }
+    .nav-item svg { width: 24px; height: 24px; }
+
+    #loading {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: var(--ink);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+  <div id="loading">Loading Portal...</div>
+
+  <header>
+    <div class="rider-info">
+      <div class="avatar" id="riderInitials">JD</div>
+      <div>
+        <div class="name" id="riderName">Loading...</div>
+        <div class="subtitle"><span class="status-dot"></span>Online</div>
+      </div>
+    </div>
+    <button class="btn-outline" style="width: auto; padding: 8px 16px;" onclick="logout()">Logout</button>
+  </header>
+
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-val" id="totalTrips">0</div>
+        <div class="stat-lab">Total Trips</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="rating">--</div>
+        <div class="stat-lab">Rating</div>
+      </div>
+    </div>
+
+    <div class="section-title">
+      Available Orders
+      <span style="font-size: 12px; color: var(--accent);">● Real-time</span>
+    </div>
+
+    <div id="availableList">
+      <!-- Orders populate here -->
+      <div class="empty-state">Looking for orders near you...</div>
+    </div>
+  </div>
+
+  <nav class="nav-bar">
+    <a href="#" class="nav-item active">
+      <svg fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      Home
+    </a>
+    <a href="#" class="nav-item" onclick="alert('Trip history coming soon!')">
+      <svg fill="currentColor" viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+      History
+    </a>
+    <a href="#" class="nav-item" onclick="alert('Profile settings coming soon!')">
+      <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+      Profile
+    </a>
+  </nav>
+
+  <script>
+    const API_URL = '/api';
+    const token = localStorage.getItem('mcc_token');
+    const user = JSON.parse(localStorage.getItem('mcc_user') || '{}');
+
+    if (!token || user.role !== 'RIDER') {
+      window.location.href = 'portal_login.html';
+    }
+
+    // Init UI
+    document.getElementById('riderName').textContent = user.name;
+    document.getElementById('riderInitials').textContent = user.name.split(' ').map(n=>n[0]).join('');
+    
+    async function loadAvailable() {
+      try {
+        const res = await fetch(`${API_URL}/dispatch/available`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        const list = document.getElementById('availableList');
+        
+        document.getElementById('loading').style.display = 'none';
+
+        if (!data.orders || data.orders.length === 0) {
+          list.innerHTML = '<div class="empty-state">No pending orders available right now. Stand by!</div>';
+          return;
+        }
+
+        list.innerHTML = data.orders.map(o => `
+          <div class="order-card">
+            <div class="order-header">
+              <span>Order #${o.id.slice(-6)}</span>
+              <span>${new Date(o.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+            </div>
+            <div class="order-address">${o.deliveryAddress}</div>
+            <div class="order-items">
+              ${o.items.map(i => `• ${i.product.name} (x${i.quantity})`).join('<br>')}
+            </div>
+            <button class="btn btn-primary" onclick="acceptOrder('${o.id}')">
+              Accept Delivery
+            </button>
+          </div>
+        `).join('');
+      } catch (err) {
+        console.error('Failed to load orders', err);
+        document.getElementById('loading').style.display = 'none';
+      }
+    }
+
+    async function acceptOrder(id) {
+      if (!confirm('Are you ready to pick up this order?')) return;
+      
+      try {
+        const res = await fetch(`${API_URL}/dispatch/accept/${id}`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (res.ok) {
+          alert('Order Accepted! Navigate to location.');
+          loadAvailable();
+          // In a real app, this would redirect to a "Current Delivery" view with GPS
+        } else {
+          const err = await res.json();
+          alert('Error: ' + err.error);
+        }
+      } catch (err) {
+        alert('Submission failed');
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('mcc_token');
+      localStorage.removeItem('mcc_user');
+      window.location.href = 'portal_login.html';
+    }
+
+    // Polling for new orders
+    setInterval(loadAvailable, 30000);
+    loadAvailable();
+  </script>
+</body>
+</html>

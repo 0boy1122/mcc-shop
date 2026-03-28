@@ -1,0 +1,130 @@
+// This is your Prisma schema file for MCC Shop App
+// Optimized for PostgreSQL (Render deployment)
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma-client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String    @id @default(uuid())
+  name           String
+  email          String?   @unique
+  phone          String    @unique
+  password       String
+  role           String    @default("CUSTOMER") // Role: CUSTOMER, RIDER, ADMIN
+  savedAddresses String?   // SQLite doesn't support String[] - use JSON string
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  orders         Order[]
+  rider          Rider?
+}
+
+model Product {
+  id            String       @id @default(uuid())
+  skuCode       String       @unique
+  name          String
+  brand         String?
+  category      String
+  subCategory   String?
+  unitSize      String
+  costPrice     Float
+  sellingPrice  Float
+  vatIncluded   Boolean      @default(true)
+  bulkThreshold Int          @default(0)
+  bulkPrice     Float?
+  stockQty      Int          @default(0)
+  lowStockAlert Int          @default(5)
+  dispatchMode  String       @default("BIKE") // DispatchMode: BIKE, VAN, PICKUP
+  isFragile     Boolean      @default(false)
+  isHazardous   Boolean      @default(false)
+  images        String?      // SQLite doesn't support String[] - use JSON string
+  isPublished   Boolean      @default(false)
+  mvpPriority   Boolean      @default(false)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  orderItems    OrderItem[]
+}
+
+model Order {
+  id              String      @id @default(uuid())
+  userId          String
+  user            User        @relation(fields: [userId], references: [id])
+  status          String      @default("PENDING") // OrderStatus: PENDING, CONFIRMED, DISPATCHED, DELIVERED, CANCELLED
+  deliveryAddress String
+  deliveryLat     Float?
+  deliveryLng     Float?
+  vehicleType     String      // DispatchMode
+  deliveryFee     Float       @default(0)
+  subtotal        Float
+  total           Float
+  notes           String?
+  scheduledAt     DateTime?
+  riderId         String?
+  rider           Rider?      @relation(fields: [riderId], references: [id])
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  items           OrderItem[]
+  payment         Payment?
+  dispatchLog     DispatchLog?
+}
+
+model OrderItem {
+  id         String   @id @default(uuid())
+  orderId    String
+  order      Order    @relation(fields: [orderId], references: [id])
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id])
+  quantity   Int
+  unitPrice  Float
+  totalPrice Float
+}
+
+model Payment {
+  id         String        @id @default(uuid())
+  orderId    String        @unique
+  order      Order         @relation(fields: [orderId], references: [id])
+  method     String        // PaymentMethod: MOMO, CARD, BANK_TRANSFER, CASH
+  status     String        @default("PENDING") // PaymentStatus: PENDING, SUCCESS, FAILED
+  amount     Float
+  reference  String?       @unique
+  momoPhone  String?
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+}
+
+model Rider {
+  id          String      @id @default(uuid())
+  userId      String      @unique
+  user        User        @relation(fields: [userId], references: [id])
+  status      String      @default("OFFLINE") // RiderStatus: ONLINE, OFFLINE, ON_DELIVERY
+  currentLat  Float?
+  currentLng  Float?
+  totalTrips  Int         @default(0)
+  earnings    Float       @default(0)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  orders      Order[]
+  dispatchLogs DispatchLog[]
+}
+
+model DispatchLog {
+  id           String   @id @default(uuid())
+  orderId      String   @unique
+  order        Order    @relation(fields: [orderId], references: [id])
+  riderId      String
+  rider        Rider    @relation(fields: [riderId], references: [id])
+  proofPhotoUrl String?
+  signatureUrl  String?
+  deliveredAt  DateTime?
+  createdAt    DateTime @default(now())
+}

@@ -1,0 +1,7 @@
+node_modules/
+.env
+*.db
+backend/mcc-shop-backend/node_modules/
+backend/mcc-shop-backend/.env
+backend/mcc-shop-backend/src/generated/
+uploads/
