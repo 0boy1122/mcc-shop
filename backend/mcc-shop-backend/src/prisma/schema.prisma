@@ -1,5 +1,5 @@
 // This is your Prisma schema file for MCC Shop App
-// Optimized for PostgreSQL (Render deployment)
+// Locally optimized for SQLite compatibility
 
 generator client {
   provider = "prisma-client-js"
@@ -7,7 +7,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
