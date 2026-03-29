@@ -754,26 +754,35 @@ const bm=(items, name, phone, address, notes, vehicle)=>{
   setTimeout(dismissLoader, 3000);
 
   document.addEventListener('DOMContentLoaded', async () => {
-    console.log('DOM Content Loaded - Fetching Products');
-    try {
-      let baseUrl = window.location.protocol === 'file:' ? 'http://localhost:5000' : '';
-      const res = await fetch(baseUrl + '/api/products');
-      if(!res.ok) throw new Error("HTTP error " + res.status);
-      const data = await res.json();
-      P = (data.products || []).map(p => ({
-        sku: p.skuCode || p.id,
-        cat: p.category || 'Other',
-        name: p.name,
-        unit: p.unitSize || 'Unit',
-        price: p.sellingPrice || 0,
-        bulk: p.bulkThreshold || 5,
-        mode: p.dispatchMode === 'VAN' ? 'Van' : (p.dispatchMode === 'PICKUP' ? 'Pickup' : 'Bike'),
-        icon: CI[p.category] || '📦',
-        img: p.images ? encodeURI(baseUrl + p.images) : null
-      }));
-    } catch(e) {
-      console.error("Failed to load products from API:", e);
-    }
+    console.log('DOM Content Loaded - Initializing Products');
+    
+    // Hardcoded products for instant loading and consistency
+    const RAW_PRODUCTS = [
+      { skuCode: "PNT-001", name: "Emulsion Paint", category: "Paints", unitSize: "5 Gallon", sellingPrice: 780, bulkThreshold: 5, dispatchMode: "VAN", images: "/emulsion_paint.png" },
+      { skuCode: "PNT-002", name: "Gloss Paint", category: "Paints", unitSize: "1 Gallon", sellingPrice: 220, bulkThreshold: 10, dispatchMode: "BIKE", images: "/oil_paint.png" },
+      { skuCode: "ADH-001", name: "Silicone Sealant", category: "Adhesives", unitSize: "Tube", sellingPrice: 38, bulkThreshold: 20, dispatchMode: "BIKE", images: "/silicon_sealant.png" },
+      { skuCode: "SAF-001", name: "Safety Helmet", category: "Safety", unitSize: "Unit", sellingPrice: 75, bulkThreshold: 10, dispatchMode: "BIKE", images: "/helmet.png" },
+      { skuCode: "TLS-001", name: "Trowel", category: "Tools", unitSize: "Unit", sellingPrice: 40, bulkThreshold: 20, dispatchMode: "BIKE", images: "/trowel.png" },
+      { skuCode: "ELE-001", name: "LED Bulb", category: "Electrical", unitSize: "12W", sellingPrice: 28, bulkThreshold: 50, dispatchMode: "BIKE", images: "/led_bulb.png" },
+      { skuCode: "PLM-001", name: "Faucet", category: "Plumbing", unitSize: "Unit", sellingPrice: 160, bulkThreshold: 5, dispatchMode: "BIKE", images: "/faucet.png" },
+      { skuCode: "HDR-001", name: "Door Lock", category: "Hardware", unitSize: "Unit", sellingPrice: 190, bulkThreshold: 5, dispatchMode: "BIKE", images: "/locks.png" },
+      { skuCode: "OFF-001", name: "Office Chair", category: "Office", unitSize: "Unit", sellingPrice: 820, bulkThreshold: 2, dispatchMode: "VAN", images: "/office_chairs.jpeg" },
+      { skuCode: "PAN-001", name: "PVC Ceiling Panel", category: "Panels", unitSize: "Length", sellingPrice: 115, bulkThreshold: 50, dispatchMode: "PICKUP", images: "/ceiling_panel.jpeg" }
+    ];
+
+    let baseUrl = window.location.protocol === 'file:' ? 'http://localhost:5000' : '';
+    
+    P = RAW_PRODUCTS.map(p => ({
+      sku: p.skuCode,
+      cat: p.category || 'Other',
+      name: p.name,
+      unit: p.unitSize || 'Unit',
+      price: p.sellingPrice || 0,
+      bulk: p.bulkThreshold || 5,
+      mode: p.dispatchMode === 'VAN' ? 'Van' : (p.dispatchMode === 'PICKUP' ? 'Pickup' : 'Bike'),
+      icon: CI[p.category] || '📦',
+      img: p.images ? encodeURI(baseUrl + p.images) : null
+    }));
     
     try {
       buildTabs(); renderGrid(); buildHeroFeat();
