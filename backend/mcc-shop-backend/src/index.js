@@ -53,8 +53,9 @@ app.use(cors({ origin: true, credentials: true }));
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
-app.use(express.static(path.join(__dirname, "../../.."))); // Correctly serve the parent directory
+
+// Serve frontend and images from the 'public' folder
+app.use(express.static(path.join(__dirname, "../public")));
 
 // ── Routes ─────────────────────────────────────────────
 app.use("/api/auth", authRoutes);
