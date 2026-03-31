@@ -45,7 +45,7 @@
     }
 
     .rider-info { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1; }
-    .avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--sage); display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; }
+    .avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--sage); display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; box-shadow: 0 0 0 3px rgba(46,139,101,.3); }
     .name { font-size: 16px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: inline-block; margin-right: 4px; }
 
@@ -65,7 +65,7 @@
       padding: 20px;
       text-align: center;
     }
-    .stat-val { font-size: 24px; font-weight: 700; color: var(--sage); }
+    .stat-val { font-size: 28px; font-weight: 700; color: var(--sage); font-family: 'Fraunces', serif; letter-spacing: -.03em; }
     .stat-lab { font-size: 11px; color: var(--t3); text-transform: uppercase; margin-top: 4px; }
 
     .section-title {
@@ -81,10 +81,12 @@
       background: var(--ink2);
       border: 1px solid var(--border);
       border-radius: 20px;
+      border-top: 3px solid var(--sage);
       padding: 20px;
       margin-bottom: 16px;
-      transition: transform 0.2s;
+      transition: transform .2s, box-shadow .2s;
     }
+    .order-card:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(0,0,0,.3); }
     .order-header { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 13px; color: var(--t3); }
     .order-id { font-weight: 700; color: var(--sage); }
     .order-address { font-size: 15px; font-weight: 500; margin-bottom: 8px; color: white; }
@@ -104,7 +106,7 @@
       gap: 8px;
       transition: 0.2s;
     }
-    .btn-primary { background: var(--sage); color: white; }
+    .btn-primary { background: linear-gradient(135deg, var(--sage) 0%, var(--sage2) 100%); color: white; box-shadow: 0 4px 16px rgba(46,139,101,.3); font-weight: 700; font-size: 15px; letter-spacing: .02em; }
     .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--t2); }
     .btn:active { transform: scale(0.98); }
 
@@ -177,7 +179,11 @@
 
     <div id="availableList">
       <!-- Orders populate here -->
-      <div class="empty-state">Looking for orders near you...</div>
+      <div style="text-align:center;padding:60px 20px;">
+        <div style="font-size:48px;margin-bottom:16px;">📦</div>
+        <div style="font-size:16px;font-weight:600;color:rgba(255,255,255,.5);margin-bottom:6px;">No orders yet</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.3);">New orders appear here automatically</div>
+      </div>
     </div>
   </div>
 
