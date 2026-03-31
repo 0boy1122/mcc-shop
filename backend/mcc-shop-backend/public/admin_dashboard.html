@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Admin Dashboard | The MCC Shop</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -28,6 +28,38 @@
       display: flex;
     }
 
+    /* Mobile Menu Toggle */
+    .mobile-header {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: var(--ink2);
+      border-bottom: 1px solid var(--border);
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      z-index: 1001;
+    }
+
+    .mobile-menu-btn {
+      background: none;
+      border: none;
+      color: var(--t1);
+      cursor: pointer;
+      padding: 8px;
+    }
+
+    .mobile-menu-btn svg {
+      width: 24px;
+      height: 24px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+    }
+
     /* Sidebar */
     .sidebar {
       width: 280px;
@@ -38,6 +70,8 @@
       flex-direction: column;
       position: fixed;
       height: 100vh;
+      z-index: 1000;
+      transition: transform 0.3s ease;
     }
 
     .logo {
@@ -211,12 +245,159 @@
       justify-content: center;
       z-index: 1000;
     }
+
+    /* Mobile Overlay */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 999;
+      backdrop-filter: blur(4px);
+    }
+
+    /* ═══ MOBILE RESPONSIVE ═══ */
+    @media (max-width: 768px) {
+      .mobile-header {
+        display: flex;
+      }
+
+      .sidebar {
+        transform: translateX(-100%);
+        box-shadow: 4px 0 12px rgba(0,0,0,0.5);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .sidebar-overlay.active {
+        display: block;
+      }
+
+      .main-content {
+        margin-left: 0;
+        padding: 80px 20px 32px;
+        width: 100%;
+      }
+
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+
+      .btn-primary {
+        width: 100%;
+        justify-content: center;
+      }
+
+      /* Mobile Table - Card View */
+      .card table {
+        display: none;
+      }
+
+      .mobile-card-list {
+        display: block !important;
+        padding: 16px;
+      }
+
+      .mobile-product-card {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 16px;
+        margin-bottom: 12px;
+      }
+
+      .mobile-product-card h3 {
+        font-size: 16px;
+        color: white;
+        margin-bottom: 8px;
+      }
+
+      .mobile-product-info {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 12px;
+        font-size: 13px;
+      }
+
+      .mobile-product-info div {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .mobile-product-info label {
+        font-size: 10px;
+        color: var(--t3);
+        text-transform: uppercase;
+        font-weight: 600;
+      }
+
+      .mobile-product-info span {
+        color: var(--t2);
+      }
+
+      .mobile-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid var(--border);
+      }
+
+      .mobile-actions button {
+        flex: 1;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: rgba(255,255,255,0.05);
+        color: var(--t2);
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .mobile-actions button:hover {
+        background: rgba(255,255,255,0.08);
+      }
+
+      .mobile-actions .delete-btn {
+        border-color: rgba(255,118,118,0.3);
+        color: #ff7676;
+      }
+
+      /* Stats Grid */
+      #view-overview > div {
+        grid-template-columns: 1fr !important;
+      }
+    }
   </style>
 </head>
 <body>
   <div id="loading">Loading...</div>
 
-  <div class="sidebar">
+  <!-- Mobile Header -->
+  <div class="mobile-header">
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+      <svg viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <div class="logo" style="margin: 0; font-size: 20px;">MCC SHOP</div>
+    <div style="width: 40px;"></div>
+  </div>
+
+  <!-- Sidebar Overlay -->
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeMobileMenu()"></div>
+
+  <div class="sidebar" id="sidebar">
     <div class="logo">MCC SHOP</div>
     <div class="nav-menu">
       <div class="nav-item active" onclick="switchTab(this, 'overview')">
@@ -270,6 +451,10 @@
           <!-- Products will be loaded here -->
         </tbody>
       </table>
+      <!-- Mobile Card View -->
+      <div class="mobile-card-list" id="mobileProductList" style="display:none;">
+        <!-- Mobile products will be loaded here -->
+      </div>
     </div>
 
     <!-- Orders View -->
@@ -438,6 +623,7 @@
       align-items: center;
       justify-content: center;
       z-index: 1100;
+      padding: 20px;
     }
     .modal-overlay.open { display: flex; }
     .modal-card {
@@ -448,6 +634,27 @@
       max-width: 600px;
       padding: 40px;
       position: relative;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    @media (max-width: 768px) {
+      .modal-overlay {
+        padding: 0;
+        align-items: flex-end;
+      }
+      .modal-card {
+        max-width: 100%;
+        border-radius: 24px 24px 0 0;
+        padding: 24px;
+        max-height: 85vh;
+      }
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      .form-group[style*="span 2"] {
+        grid-column: span 1 !important;
+      }
     }
     .modal-header {
       display: flex;
@@ -505,7 +712,8 @@
         });
         const data = await res.json();
         const products = data.products || [];
-        
+
+        // Desktop Table View
         const body = document.getElementById('productBody');
         body.innerHTML = products.map(p => `
           <tr>
@@ -523,7 +731,41 @@
             </td>
           </tr>
         `).join('');
-        
+
+        // Mobile Card View
+        const mobileList = document.getElementById('mobileProductList');
+        mobileList.innerHTML = products.map(p => `
+          <div class="mobile-product-card">
+            <h3>${p.name}</h3>
+            <div class="mobile-product-info">
+              <div>
+                <label>SKU</label>
+                <span class="sku-badge">${p.skuCode}</span>
+              </div>
+              <div>
+                <label>Category</label>
+                <span>${p.category}</span>
+              </div>
+              <div>
+                <label>Price</label>
+                <span style="color:white; font-weight:600;">GHS ${p.sellingPrice.toLocaleString()}</span>
+              </div>
+              <div>
+                <label>Stock</label>
+                <span>${p.stockQty} units</span>
+              </div>
+              <div style="grid-column: span 2;">
+                <label>Status</label>
+                <span class="status-pill ${p.isPublished ? 'status-published' : 'status-draft'}">${p.isPublished ? 'PUBLISHED' : 'DRAFT'}</span>
+              </div>
+            </div>
+            <div class="mobile-actions">
+              <button onclick="editProduct('${p.id}')">✏️ Edit</button>
+              <button class="delete-btn" onclick="deleteProduct('${p.id}')">🗑️ Delete</button>
+            </div>
+          </div>
+        `).join('');
+
         document.getElementById('loading').style.display = 'none';
       } catch (err) {
         console.error('Failed to load products', err);
@@ -821,6 +1063,30 @@
       localStorage.removeItem('mcc_user');
       window.location.href = 'portal_login.html';
     }
+
+    // Mobile Menu Functions
+    function toggleMobileMenu() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebarOverlay');
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('active');
+    }
+
+    function closeMobileMenu() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebarOverlay');
+      sidebar.classList.remove('open');
+      overlay.classList.remove('active');
+    }
+
+    // Wrap switchTab to close mobile menu
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.addEventListener('click', () => {
+        if (window.innerWidth <= 768) {
+          setTimeout(closeMobileMenu, 100);
+        }
+      });
+    });
 
     // Start with Overview automatically
     const defaultNav = document.querySelector('.nav-item');

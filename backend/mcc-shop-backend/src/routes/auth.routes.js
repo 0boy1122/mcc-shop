@@ -39,12 +39,42 @@ router.post("/register", async (req, res, next) => {
 // POST /api/auth/login
 router.post("/login", async (req, res, next) => {
   try {
-    const { phone, password } = req.body;
+    const { phone, password, role } = req.body;
 
     if (!phone || !password) {
       return res.status(400).json({ error: "Phone and password are required" });
     }
 
+    // Check if this is a staff login attempt (ADMIN or RIDER)
+    if (role && (role === "ADMIN" || role === "RIDER")) {
+      const staffPassword = process.env.STAFF_PASSWORD;
+
+      if (!staffPassword) {
+        console.error("STAFF_PASSWORD not configured in environment");
+        return res.status(500).json({ error: "Staff login not configured" });
+      }
+
+      // Verify staff password
+      if (password === staffPassword) {
+        // Create a virtual staff user object for this session
+        const staffUser = {
+          id: `${role.toLowerCase()}-${phone}`,
+          name: role === "ADMIN" ? "Admin" : "Rider",
+          phone: phone,
+          role: role,
+          email: null
+        };
+
+        const token = generateToken(staffUser.id);
+        console.log(`Staff login successful: ${role} with phone ${phone}`);
+        return res.json({ user: staffUser, token });
+      } else {
+        console.warn(`Staff login failed: Incorrect password for ${role} with phone ${phone}`);
+        return res.status(401).json({ error: "Invalid credentials" });
+      }
+    }
+
+    // Regular customer login flow
     const user = await prisma.user.findUnique({ where: { phone } });
     if (!user) {
         console.warn(`Login failed: Phone ${phone} not found`);

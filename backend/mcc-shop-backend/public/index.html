@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>The MCC Shop — Home, Office & Construction Site Delivery | Accra</title>
 <meta name="description" content="The MCC Shop is Ghana's most trusted construction and home-improvement delivery ecosystem. Order building materials, decor, tools, and office furniture for fast delivery in Accra.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -366,18 +366,31 @@ footer{background:var(--ink);padding:72px 48px 0;}
 .bnav-btn.on svg{stroke:var(--sage);}
 .bnav-bdg{position:absolute; top:-4px; right:4px; background:var(--amber); color:white; font-size:9px; height:16px; min-width:16px; border-radius:100px; display:flex; align-items:center; justify-content:center; padding:0 3px;}
 
+/* ══ MOBILE SEARCH OVERLAY ══ */
+.srch-overlay{display:none;position:fixed;inset:0;z-index:600;background:rgba(13,26,18,.7);backdrop-filter:blur(8px);padding:20px;}
+.srch-overlay.open{display:flex;flex-direction:column;gap:12px;}
+.srch-overlay-bar{display:flex;align-items:center;background:white;border-radius:16px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3);}
+.srch-overlay-bar svg{width:18px;height:18px;stroke:var(--t3);fill:none;stroke-width:2;flex-shrink:0;margin-left:16px;}
+.srch-overlay-bar input{flex:1;border:none;outline:none;font-family:'DM Sans',sans-serif;font-size:17px;color:var(--t1);padding:16px 12px;}
+.srch-overlay-close{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);border-radius:12px;color:white;font-size:13px;font-weight:600;padding:10px 20px;align-self:flex-start;}
+
 @media(max-width:960px){
   nav{padding:0 16px; gap: 8px;}
   .nav-mid{display:none;}
   .srch{width:140px;}
-  .nwa{display:none;} /* Hide chat button in nav earlier to avoid crowding */
-  .hero-content{grid-template-columns:1fr;gap:40px;}
-  .hero-l{padding:80px 24px 20px;}
-  .hero-r{padding:0 24px 60px;}
+  .nwa{display:none;}
+  .hero-content{grid-template-columns:1fr;}
+  .hero-l{padding:80px 24px 32px;}
+  .hero-r{display:none;}
+  .hero-scroll{left:24px;}
   .statsbar .stats-inner{grid-template-columns:1fr 1fr;}
   .stat-item{border-bottom:1px solid rgba(255,255,255,.07);}
   .products-section{padding:60px 20px;}
   .pgrid{grid-template-columns:repeat(2,1fr);}
+  .pcard-foot{flex-direction:column;align-items:stretch;gap:8px;}
+  .qty-ctrl{width:100%;justify-content:center;}
+  .order-btn{width:100%;}
+  .detail-btn{width:100%;height:40px;border-radius:10px;}
   .pcard:hover{transform:none;}
   .pcard:hover .pcard-em{transform:none;}
   input, textarea, select { font-size: 16px !important; }
@@ -402,20 +415,27 @@ footer{background:var(--ink);padding:72px 48px 0;}
   .srch-ic{padding:0;}
   .ncrt{width:34px;height:34px; border-radius: 10px;}
   .ncrt svg{width:15px; height:15px;}
-  .pgrid{grid-template-columns:1fr; gap: 16px; padding: 0 12px;}
-  .pcard-foot{flex-direction:column; align-items:stretch; gap: 8px;}
+  .pgrid{grid-template-columns:repeat(2,1fr);gap:12px;padding:0 8px;}
+  .pcard-body{padding:14px;}
+  .pcard-foot{padding:12px 14px;flex-direction:column;align-items:stretch;gap:8px;}
+  .pcard-name{font-size:16px;}
+  .pcard-price{font-size:22px;}
+  .pcard-em{font-size:52px;}
+  .pcard-img{aspect-ratio:1;}
   .add-to-cart-btn{margin-left: 0 !important;}
   .hero h1{font-size:38px;}
   .hero-sub{font-size:15px;}
-  .pcard-name{font-size:18px;}
-  .pcard-price{font-size:26px;}
   .pcard:hover{transform:none; box-shadow: 0 4px 12px rgba(0,0,0,0.05);}
   .pcard:hover .pcard-em{transform:none;}
   .mdl-body{padding:20px;}
   .mdl-name{font-size:28px;}
   .mdl-price{font-size:36px;}
+  .mdl-specs{grid-template-columns:1fr 1fr;}
   .fbrand-name{font-size:26px;}
   .foot-top{grid-template-columns:1fr;}
+  /* Checkout modal as bottom sheet on mobile */
+  #chkOvl{padding:0;align-items:flex-end;}
+  #chkOvl .mdl{border-radius:24px 24px 0 0;max-height:88vh;max-width:100%;}
 }
 </style>
 </head>
@@ -443,6 +463,15 @@ footer{background:var(--ink);padding:72px 48px 0;}
     Cart<div id="bnav-bdg" class="bnav-bdg" style="display:none">0</div>
   </a>
   <a href="portal_login.html" class="bnav-btn"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Staff</a>
+</div>
+
+<!-- MOBILE SEARCH OVERLAY -->
+<div id="srchOverlay" class="srch-overlay" onclick="if(event.target===this)closeMobileSearch()">
+  <div class="srch-overlay-bar">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+    <input id="si-mobile" type="text" placeholder="Search products…" oninput="doMobileSearch()" autofocus>
+  </div>
+  <button class="srch-overlay-close" onclick="closeMobileSearch()">✕ Close</button>
 </div>
 
 <!-- ANNOUNCE -->
@@ -490,7 +519,7 @@ footer{background:var(--ink);padding:72px 48px 0;}
     </div>
   </div>
   <div class="nav-r">
-    <div class="srch">
+    <div class="srch" onclick="if(window.innerWidth<=480)openMobileSearch()">
       <div class="srch-ic"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></div>
       <input id="si" type="text" placeholder="Search products…" oninput="doSearch()">
     </div>
@@ -755,9 +784,9 @@ const bm=(items, name, phone, address, notes, vehicle)=>{
 
   document.addEventListener('DOMContentLoaded', async () => {
     console.log('DOM Content Loaded - Initializing Products');
-    
-    // Hardcoded products for instant loading and consistency
-    const RAW_PRODUCTS = [
+
+    // Fallback list — used only if API is unreachable
+    const FALLBACK_PRODUCTS = [
       { skuCode: "PNT-001", name: "Emulsion Paint", category: "Paints", unitSize: "5 Gallon", sellingPrice: 780, bulkThreshold: 5, dispatchMode: "VAN", images: "/emulsion_paint.png" },
       { skuCode: "PNT-002", name: "Gloss Paint", category: "Paints", unitSize: "1 Gallon", sellingPrice: 220, bulkThreshold: 10, dispatchMode: "BIKE", images: "/oil_paint.png" },
       { skuCode: "ADH-001", name: "Silicone Sealant", category: "Adhesives", unitSize: "Tube", sellingPrice: 38, bulkThreshold: 20, dispatchMode: "BIKE", images: "/silicon_sealant.png" },
@@ -766,26 +795,41 @@ const bm=(items, name, phone, address, notes, vehicle)=>{
       { skuCode: "ELE-001", name: "LED Bulb", category: "Electrical", unitSize: "12W", sellingPrice: 28, bulkThreshold: 50, dispatchMode: "BIKE", images: "/led_bulb.png" },
       { skuCode: "PLM-001", name: "Faucet", category: "Plumbing", unitSize: "Unit", sellingPrice: 160, bulkThreshold: 5, dispatchMode: "BIKE", images: "/faucet.png" },
       { skuCode: "HDR-001", name: "Door Lock", category: "Hardware", unitSize: "Unit", sellingPrice: 190, bulkThreshold: 5, dispatchMode: "BIKE", images: "/locks.png" },
-      { skuCode: "OFF-001", name: "Office Chair", category: "Office", unitSize: "Unit", sellingPrice: 820, bulkThreshold: 2, dispatchMode: "VAN", images: "/office_chairs.jpeg" },
+      { skuCode: "OFF-001", name: "Home Chair", category: "Office", unitSize: "Unit", sellingPrice: 820, bulkThreshold: 2, dispatchMode: "VAN", images: "/office_chairs.jpeg" },
       { skuCode: "PAN-001", name: "PVC Ceiling Panel", category: "Panels", unitSize: "Length", sellingPrice: 115, bulkThreshold: 50, dispatchMode: "PICKUP", images: "/ceiling_panel.jpeg" }
     ];
 
-    let baseUrl = window.location.protocol === 'file:' ? 'http://localhost:5000' : '';
-    
-    P = RAW_PRODUCTS.map(p => ({
+    const mapProduct = p => ({
       sku: p.skuCode,
       cat: p.category || 'Other',
       name: p.name,
       unit: p.unitSize || 'Unit',
       price: p.sellingPrice || 0,
       bulk: p.bulkThreshold || 5,
+      bulkPrice: p.bulkPrice || null,
       mode: p.dispatchMode === 'VAN' ? 'Van' : (p.dispatchMode === 'PICKUP' ? 'Pickup' : 'Bike'),
       icon: CI[p.category] || '📦',
-      img: p.images ? encodeURI(baseUrl + p.images) : null
-    }));
-    
+      img: p.images || null
+    });
+
+    // Load live products from the API
     try {
-      buildTabs(); renderGrid(); buildHeroFeat();
+      const res = await fetch('/api/products?limit=100');
+      if (!res.ok) throw new Error(`API ${res.status}`);
+      const data = await res.json();
+      if (data.products && data.products.length > 0) {
+        P = data.products.map(mapProduct);
+        console.log(`Loaded ${P.length} products from API`);
+      } else {
+        throw new Error('Empty product list');
+      }
+    } catch(err) {
+      console.warn('API unavailable, using fallback products:', err.message);
+      P = FALLBACK_PRODUCTS.map(mapProduct);
+    }
+
+    try {
+      buildTabs(); renderGrid(); buildHeroFeat(); buildFCats();
       initCursor(); initReveal(); initNav(); initCanvas(); initMagneticCards();
     } catch(e) {
       console.error("Initialization error:", e);
@@ -838,6 +882,9 @@ function buildTabs(){
 }
 function setCat(btn,cat){ac=cat;document.querySelectorAll('.ftab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');renderGrid();}
 function doSearch(){sq=document.getElementById('si').value.trim().toLowerCase();renderGrid();}
+function doMobileSearch(){sq=document.getElementById('si-mobile').value.trim().toLowerCase();renderGrid();}
+function openMobileSearch(){const o=document.getElementById('srchOverlay');o.classList.add('open');setTimeout(()=>document.getElementById('si-mobile').focus(),50);}
+function closeMobileSearch(){document.getElementById('srchOverlay').classList.remove('open');}
 
 /* ── GRID ── */
 function renderGrid(){

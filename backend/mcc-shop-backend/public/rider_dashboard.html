@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Rider Portal | The MCC Shop</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -27,11 +27,12 @@
       background-color: var(--ink);
       color: var(--t1);
       font-family: 'Outfit', sans-serif;
-      padding-bottom: 80px;
+      padding-bottom: calc(80px + env(safe-area-inset-bottom));
     }
 
     header {
-      padding: 24px 20px;
+      padding: 16px 20px;
+      padding-top: calc(16px + env(safe-area-inset-top));
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -40,11 +41,12 @@
       position: sticky;
       top: 0;
       z-index: 100;
+      gap: 12px;
     }
 
-    .rider-info { display: flex; align-items: center; gap: 12px; }
-    .avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--sage); display: flex; align-items: center; justify-content: center; font-weight: 700; }
-    .name { font-size: 16px; font-weight: 600; }
+    .rider-info { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1; }
+    .avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--sage); display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; }
+    .name { font-size: 16px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: inline-block; margin-right: 4px; }
 
     .container { padding: 20px; max-width: 600px; margin: 0 auto; }
@@ -119,7 +121,7 @@
       border-top: 1px solid var(--border);
       display: flex;
       justify-content: space-around;
-      padding: 12px;
+      padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
       backdrop-filter: blur(10px);
     }
     .nav-item {
@@ -204,8 +206,9 @@
     }
 
     // Init UI
-    document.getElementById('riderName').textContent = user.name;
-    document.getElementById('riderInitials').textContent = user.name.split(' ').map(n=>n[0]).join('');
+    const displayName = user.name || 'Rider';
+    document.getElementById('riderName').textContent = displayName;
+    document.getElementById('riderInitials').textContent = displayName.split(' ').filter(Boolean).map(n=>n[0]).join('').slice(0,2).toUpperCase();
     
     async function loadAvailable() {
       try {
