@@ -186,11 +186,11 @@
       <svg fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
       Home
     </a>
-    <a href="#" class="nav-item" onclick="alert('Trip history coming soon!')">
+    <a href="#" class="nav-item" style="opacity:0.4;pointer-events:none;">
       <svg fill="currentColor" viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
       History
     </a>
-    <a href="#" class="nav-item" onclick="alert('Profile settings coming soon!')">
+    <a href="#" class="nav-item" style="opacity:0.4;pointer-events:none;">
       <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
       Profile
     </a>
@@ -233,7 +233,7 @@
             </div>
             <div class="order-address">${o.deliveryAddress}</div>
             <div class="order-items">
-              ${o.items.map(i => `• ${i.product.name} (x${i.quantity})`).join('<br>')}
+              ${o.items.map(i => `• ${i.product?.name || 'Unknown Product'} (x${i.quantity})`).join('<br>')}
             </div>
             <button class="btn btn-primary" onclick="acceptOrder('${o.id}')">
               Accept Delivery
@@ -243,6 +243,7 @@
       } catch (err) {
         console.error('Failed to load orders', err);
         document.getElementById('loading').style.display = 'none';
+        document.getElementById('availableList').innerHTML = '<div class="empty-state" style="color:#ff7676;">Failed to load orders. Check your connection and try refreshing.</div>';
       }
     }
 
@@ -269,13 +270,14 @@
     }
 
     function logout() {
+      clearInterval(pollInterval);
       localStorage.removeItem('mcc_token');
       localStorage.removeItem('mcc_user');
       window.location.href = 'portal_login.html';
     }
 
     // Polling for new orders
-    setInterval(loadAvailable, 30000);
+    const pollInterval = setInterval(loadAvailable, 30000);
     loadAvailable();
   </script>
 </body>

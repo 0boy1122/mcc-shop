@@ -109,10 +109,13 @@
       
       btnText.style.display = 'none'; loader.style.display = 'block'; errorDiv.style.display = 'none';
 
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15000);
       try {
         const res = await fetch('/api/auth/login', {
           method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ phone, password, role: currentRole })
+          body: JSON.stringify({ phone, password, role: currentRole }),
+          signal: controller.signal
         });
         const data = await res.json();
         if (res.ok) {
@@ -124,8 +127,11 @@
           window.location.href = currentRole === 'ADMIN' ? 'admin_dashboard.html' : 'rider_dashboard.html';
         } else { throw new Error(data.error || 'Login failed'); }
       } catch (err) {
-        errorDiv.innerText = err.message; errorDiv.style.display = 'block';
+        const msg = err.name === 'AbortError' ? 'Connection timed out. Please try again.' : err.message;
+        errorDiv.innerText = msg; errorDiv.style.display = 'block';
         btnText.style.display = 'block'; loader.style.display = 'none';
+      } finally {
+        clearTimeout(timeout);
       }
     };
   </script>

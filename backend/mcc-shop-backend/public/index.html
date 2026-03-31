@@ -437,6 +437,19 @@ footer{background:var(--ink);padding:72px 48px 0;}
   #chkOvl{padding:0;align-items:flex-end;}
   #chkOvl .mdl{border-radius:24px 24px 0 0;max-height:88vh;max-width:100%;}
 }
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:white;padding:12px 24px;border-radius:100px;font-size:14px;font-weight:500;z-index:9000;opacity:0;transition:all .3s;pointer-events:none;border:1px solid rgba(255,255,255,.1);white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast.success{border-color:rgba(46,139,101,.4);background:var(--ink2);}
+.toast.error{border-color:rgba(255,100,100,.3);}
+.skeleton{background:linear-gradient(90deg,var(--cream2) 25%,var(--cream3) 50%,var(--cream2) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:var(--r);}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.skel-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
+.skel-img{aspect-ratio:1;width:100%;}
+.skel-body{padding:22px;display:flex;flex-direction:column;gap:12px;}
+.skel-line{height:14px;border-radius:6px;}
+.skel-line.wide{width:80%;}
+.skel-line.narrow{width:45%;}
+.skel-line.price{height:20px;width:55%;}
 </style>
 </head>
 <body>
@@ -812,6 +825,9 @@ const bm=(items, name, phone, address, notes, vehicle)=>{
       img: p.images || null
     });
 
+    // Show skeleton placeholders while loading
+    showSkeletons();
+
     // Load live products from the API
     try {
       const res = await fetch('/api/products?limit=100');
@@ -1061,7 +1077,7 @@ async function submitCheckout(e){
     
     window.open(wl(waMsg), '_blank');
     
-    alert('🎉 Order saved and sending to WhatsApp for finalization!');
+    showToast('Order saved! Sending to WhatsApp for finalization.', 'success');
     
     // Clear cart and reset UI
     cart = {};
@@ -1071,10 +1087,16 @@ async function submitCheckout(e){
     document.getElementById('chkOvl').classList.remove('open');
     closeCart();
   } catch(err) {
-    alert('Error: ' + err.message);
+    showToast('Error: ' + err.message, 'error');
+    btn.textContent = 'Confirm & Place Order'; btn.disabled = false;
   }
-  btn.textContent = 'Confirm & Place Order'; btn.disabled = false;
 }
+
+/* ── TOAST ── */
+function showToast(msg, type='success'){const t=document.getElementById('toast');t.textContent=msg;t.className='toast '+type+' show';setTimeout(()=>t.classList.remove('show'),3000);}
+
+/* ── SKELETON LOADER ── */
+function showSkeletons(){const g=document.getElementById('pgrid');g.innerHTML=Array(6).fill(0).map(()=>`<div class="skel-card"><div class="skel-img skeleton"></div><div class="skel-body"><div class="skel-line wide skeleton"></div><div class="skel-line narrow skeleton"></div><div class="skel-line price skeleton"></div></div></div>`).join('');}
 
 /* ── FOOTER CATS ── */
 function buildFCats(){document.getElementById('fcats').innerHTML=[...new Set(P.map(p=>p.cat))].map(c=>`<li><a href="#">${c}</a></li>`).join('');}
@@ -1209,7 +1231,9 @@ let aiOpen = false;
 let aiHistory = [];
 let aiTyping = false;
 
-const PRODUCT_CONTEXT = `You are the MCC Shop AI assistant — a helpful, knowledgeable, and friendly shopping guide for The MCC Shop, Ghana's premier building materials, decor, home & office furniture, tools and equipment delivery service in Accra.
+function buildProductContext(){
+  const productContext = P.map(p => `${p.name} (${p.sku}): GHS ${p.price} / ${p.unit}, ${p.cat}, ${p.mode} delivery`).join('\n');
+  return `You are the MCC Shop AI assistant — a helpful, knowledgeable, and friendly shopping guide for The MCC Shop, Ghana's premier building materials, decor, home & office furniture, tools and equipment delivery service in Accra.
 
 ABOUT MCC SHOP:
 - Delivers to all of Accra (home, office, construction sites)
@@ -1219,20 +1243,13 @@ ABOUT MCC SHOP:
 - Bulk discounts available above threshold quantities
 
 CURRENT PRODUCTS:
-1. Emulsion Paint (5 Gallon) — GHS 780 | Category: Paints | SKU: PNT-001 | Bulk: 5+ | Delivery: Van
-2. Gloss Paint (1 Gallon) — GHS 220 | Category: Paints | SKU: PNT-002 | Bulk: 10+ | Delivery: Bike
-3. Silicone Sealant (Tube) — GHS 38 | Category: Adhesives | SKU: ADH-001 | Bulk: 20+ | Delivery: Bike
-4. Safety Helmet (Unit) — GHS 75 | Category: Safety | SKU: SAF-001 | Bulk: 10+ | Delivery: Bike
-5. Trowel (Unit) — GHS 40 | Category: Tools | SKU: TLS-001 | Bulk: 20+ | Delivery: Bike
-6. LED Bulb 12W — GHS 28 | Category: Electrical | SKU: ELE-001 | Bulk: 50+ | Delivery: Bike
-7. Faucet (Unit) — GHS 160 | Category: Plumbing | SKU: PLM-001 | Bulk: 5+ | Delivery: Bike
-8. Door Lock (Unit) — GHS 190 | Category: Hardware | SKU: HDR-001 | Bulk: 5+ | Delivery: Bike
-9. Office Chair (Unit) — GHS 820 | Category: Office | SKU: OFF-001 | Bulk: 2+ | Delivery: Van
-10. PVC Ceiling Panel (Length) — GHS 115 | Category: Panels | SKU: PAN-001 | Bulk: 50+ | Delivery: Pickup
+${productContext}
 
 ORDERING: Customers browse the site, then order via WhatsApp. No online payment — delivery fee is discussed on WhatsApp. There is no checkout flow on the site.
 
 PERSONALITY: Be warm, helpful, concise. Speak like a knowledgeable Ghanaian shop assistant. Use GHS for currency. Keep responses short (2-4 sentences max unless listing products). Always encourage WhatsApp contact for final orders. If asked about products not in the catalogue, say the team can source them.`;
+}
+const PRODUCT_CONTEXT = null; // replaced by buildProductContext() — called dynamically
 
 function toggleAI(){
   aiOpen = !aiOpen;
@@ -1281,6 +1298,7 @@ async function callClaude(userMsg){
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body: JSON.stringify({
+      system: buildProductContext(),
       messages: messages
     })
   });
@@ -1324,5 +1342,6 @@ function aiResize(el){
   el.style.height=Math.min(el.scrollHeight,100)+'px';
 }
 </script>
+<div id="toast" class="toast"></div>
 </body>
 </html>

@@ -702,7 +702,7 @@
     const token = localStorage.getItem('mcc_token');
 
     if (!token) {
-      window.location.href = 'admin_login.html';
+      window.location.href = 'portal_login.html';
     }
 
     async function loadProducts() {
@@ -770,6 +770,8 @@
       } catch (err) {
         console.error('Failed to load products', err);
         document.getElementById('loading').style.display = 'none';
+        document.getElementById('productBody').innerHTML = `<tr><td colspan="7" style="text-align:center;padding:40px;color:#ff7676;">Failed to load products. Please refresh the page or check your connection.</td></tr>`;
+        document.getElementById('mobileProductList').innerHTML = `<div style="text-align:center;padding:40px;color:#ff7676;">Failed to load products. Please refresh the page or check your connection.</div>`;
       }
     }
 
@@ -846,6 +848,10 @@
         const orders = data.orders || [];
         
         const body = document.getElementById('ordersBody');
+        if (orders.length === 0) {
+          body.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:60px;color:var(--t3);"><div style="font-size:40px;margin-bottom:12px;">📦</div><div style="font-size:16px;font-weight:600;color:var(--t2);margin-bottom:6px;">No orders yet</div><div style="font-size:13px;">Orders will appear here once customers start placing them.</div></td></tr>`;
+          return;
+        }
         body.innerHTML = orders.map(o => `
           <tr>
             <td style="font-family:monospace; color:var(--t2); font-size:12px;">${o.id.split('-')[0]}</td>
@@ -912,7 +918,9 @@
       document.getElementById('productModal').classList.add('open');
       
       try {
-        const res = await fetch(`${API_URL}/products/${id}`);
+        const res = await fetch(`${API_URL}/products/${id}`, {
+          headers: { 'Authorization': 'Bearer ' + localStorage.getItem('mcc_token') }
+        });
         const { product } = await res.json();
         
         document.getElementById('productId').value = product.id;
@@ -975,7 +983,7 @@
       const cost = parseFloat(document.getElementById('pCost').value) || 0;
       const sell = parseFloat(document.getElementById('pSell').value) || 0;
       if (cost > 0) {
-        const margin = ((sell - cost) / sell) * 100;
+        const margin = ((sell - cost) / cost) * 100;
         document.getElementById('pMargin').textContent = margin.toFixed(1) + '%';
         document.getElementById('pMargin').style.color = (margin >= 8 && margin <= 20) ? '#3DA176' : '#ff7676';
       }
