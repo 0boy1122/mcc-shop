@@ -76,9 +76,12 @@
 
     .logo {
       font-family: 'Fraunces', serif;
+      font-size: 22px;
       font-weight: 900;
-      font-size: 24px;
-      color: var(--sage);
+      color: white;
+      letter-spacing: -.04em;
+      padding: 28px 24px 20px;
+      border-bottom: 1px solid var(--border);
       margin-bottom: 48px;
     }
 
@@ -158,28 +161,32 @@
     }
 
     .btn-primary {
-      background: var(--sage);
-      color: white;
-      border: none;
-      border-radius: 10px;
-      padding: 12px 24px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
+      display: inline-flex;
       align-items: center;
       gap: 8px;
+      background: linear-gradient(135deg,#2E8B65 0%,#25a070 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 24px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: .3s cubic-bezier(.16,1,.3,1);
+      letter-spacing: .03em;
+      box-shadow: 0 4px 16px rgba(46,139,101,.3);
     }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(46,139,101,.45); }
 
     /* Table Styles */
     .card {
-      background: var(--ink2);
+      background: rgba(255,255,255,.03);
       border: 1px solid var(--border);
       border-radius: 20px;
       overflow: hidden;
-      transition: transform .2s, box-shadow .2s;
+      transition: transform .25s, box-shadow .25s;
     }
-    .card:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.2); }
+    .card:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0,0,0,.2); }
 
     table {
       width: 100%;
@@ -484,21 +491,21 @@
     <!-- Overview View -->
     <div id="view-overview" style="display:none;">
       <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:24px; margin-bottom:24px;">
-        <div class="card" style="padding:24px; text-align:center;">
-          <div style="color:var(--t3); font-size:12px; text-transform:uppercase; font-weight:600; margin-bottom:8px;">Total Revenue</div>
-          <div id="stat-rev" style="font-size:32px; font-weight:700; color:white;">GHS 0</div>
+        <div class="card" style="padding:28px; text-align:center; border-left:3px solid var(--sage);">
+          <div style="color:var(--t3); font-size:11px; text-transform:uppercase; font-weight:600; margin-bottom:10px; letter-spacing:.08em;">Total Revenue</div>
+          <div id="stat-rev" style="font-size:40px; font-weight:900; color:white; font-family:'Fraunces',serif; letter-spacing:-.04em;">GHS 0</div>
         </div>
-        <div class="card" style="padding:24px; text-align:center;">
-          <div style="color:var(--t3); font-size:12px; text-transform:uppercase; font-weight:600; margin-bottom:8px;">Total Orders</div>
-          <div id="stat-ords" style="font-size:32px; font-weight:700; color:white;">0</div>
+        <div class="card" style="padding:28px; text-align:center; border-left:3px solid var(--sage);">
+          <div style="color:var(--t3); font-size:11px; text-transform:uppercase; font-weight:600; margin-bottom:10px; letter-spacing:.08em;">Total Orders</div>
+          <div id="stat-ords" style="font-size:40px; font-weight:900; color:white; font-family:'Fraunces',serif; letter-spacing:-.04em;">0</div>
         </div>
-        <div class="card" style="padding:24px; text-align:center;">
-          <div style="color:var(--t3); font-size:12px; text-transform:uppercase; font-weight:600; margin-bottom:8px;">Pending Orders</div>
-          <div id="stat-pend" style="font-size:32px; font-weight:700; color:var(--sage2);">0</div>
+        <div class="card" style="padding:28px; text-align:center; border-left:3px solid var(--sage);">
+          <div style="color:var(--t3); font-size:11px; text-transform:uppercase; font-weight:600; margin-bottom:10px; letter-spacing:.08em;">Pending Orders</div>
+          <div id="stat-pend" style="font-size:40px; font-weight:900; color:var(--sage2); font-family:'Fraunces',serif; letter-spacing:-.04em;">0</div>
         </div>
-        <div class="card" style="padding:24px; text-align:center;">
-          <div style="color:var(--t3); font-size:12px; text-transform:uppercase; font-weight:600; margin-bottom:8px;">Registered Users</div>
-          <div id="stat-users" style="font-size:32px; font-weight:700; color:white;">0</div>
+        <div class="card" style="padding:28px; text-align:center; border-left:3px solid var(--sage);">
+          <div style="color:var(--t3); font-size:11px; text-transform:uppercase; font-weight:600; margin-bottom:10px; letter-spacing:.08em;">Registered Users</div>
+          <div id="stat-users" style="font-size:40px; font-weight:900; color:white; font-family:'Fraunces',serif; letter-spacing:-.04em;">0</div>
         </div>
       </div>
     </div>

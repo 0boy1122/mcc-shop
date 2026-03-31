@@ -8,76 +8,101 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700;9..144,900&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    :root { --sage: #2E8B65; --sage2: #3DA176; --ink: #0A120E; --ink2: #0D1A12; --border: rgba(255,255,255,0.1); --t1: #F8FAFB; --t2: rgba(255,255,255,0.7); --t3: rgba(255,255,255,0.4); }
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body { background:var(--ink); color:var(--t1); font-family:'Outfit', sans-serif; display:flex; align-items:center; justify-content:center; min-height:100vh; overflow:hidden; }
-    .bg-glow { position:absolute; width:600px; height:600px; background:radial-gradient(circle, rgba(46,139,101,0.15) 0%, transparent 70%); top:50%; left:50%; transform:translate(-50%,-50%); z-index:-1; filter:blur(80px); }
-    .login-card { background:var(--ink2); border:1px solid var(--border); border-radius:24px; width:100%; max-width:400px; padding:40px; box-shadow:0 60px 120px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.05); position:relative; overflow:hidden; backdrop-filter:blur(20px); }
-    .header { text-align:center; margin-bottom:32px; }
-    .logo { font-family:'Fraunces', serif; font-weight:900; font-size:28px; letter-spacing:-.03em; color:var(--sage); margin-bottom:4px; }
-    .subtitle { font-size:12px; color:var(--t3); text-transform:uppercase; letter-spacing:0.1em; }
-
-    /* Role Switcher */
-    .role-switch { display:flex; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:12px; padding:4px; margin-bottom:32px; position:relative; }
-    .role-btn { flex:1; padding:10px; border:none; background:none; color:var(--t3); font-size:12px; font-weight:700; cursor:pointer; position:relative; z-index:2; transition:0.3s; }
-    .role-btn.active { color:white; }
-    .role-pill { position:absolute; top:4px; left:4px; width:calc(50% - 4px); height:calc(100% - 8px); background:var(--sage); border-radius:8px; transition:0.3s cubic-bezier(0.16, 1, 0.3, 1); z-index:1; box-shadow:0 2px 8px rgba(0,0,0,.3); }
-    .role-switch[data-role="RIDER"] .role-pill { transform:translateX(100%); }
-
-    .form-group { margin-bottom:20px; }
-    label { display:block; font-size:11px; font-weight:600; color:var(--t3); text-transform:uppercase; margin-bottom:8px; }
-    input { width:100%; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:10px; padding:12px 16px; color:white; font-family:inherit; font-size:16px; outline:none; transition:0.3s; }
-    input:focus { border-color:var(--sage); background:rgba(46,139,101,0.05); }
-    .pw-wrap { position:relative; }
-    .pw-wrap input { padding-right:48px; }
-    .pw-toggle { position:absolute; right:14px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--t3); cursor:pointer; padding:4px; display:flex; align-items:center; }
-    .pw-toggle svg { width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:2; }
-    .btn-login { width:100%; background:linear-gradient(135deg, #2E8B65 0%, #25a070 100%); color:white; border:none; border-radius:12px; padding:14px; font-size:15px; font-weight:600; cursor:pointer; transition:0.3s; margin-top:8px; box-shadow:0 8px 24px rgba(46,139,101,.3); letter-spacing:.03em; }
-    .btn-login:hover { box-shadow:0 12px 32px rgba(46,139,101,.45); transform:translateY(-2px); }
-    .error-msg { background:rgba(255,71,71,0.1); border:1px solid rgba(255,71,71,0.2); color:#ff7676; padding:10px; border-radius:8px; font-size:12px; margin-bottom:20px; display:none; text-align:center; }
-    
-    .loader { display:none; width:18px; height:18px; border:2px solid rgba(255,255,255,0.3); border-top-color:white; border-radius:50%; animation:spin 0.8s linear infinite; margin:0 auto; }
-    @keyframes spin { to { transform:rotate(360deg); } }
-    .footer-note { text-align:center; font-size:12px; color:var(--t3); margin-top:24px; }
-    .footer-link { color:var(--sage); text-decoration:none; font-weight:500; }
+    :root{--sage:#2E8B65;--sage2:#3DA176;--ink:#0A120E;--ink2:#0D1A12;--border:rgba(255,255,255,0.08);--t1:#F8FAFB;--t2:rgba(255,255,255,0.7);--t3:rgba(255,255,255,0.4);}
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{background:var(--ink);color:var(--t1);font-family:'Outfit',sans-serif;min-height:100vh;display:flex;overflow:hidden;}
+    .split-left{flex:1;background:linear-gradient(145deg,#0a1e14 0%,#0d2418 50%,#071208 100%);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+    .split-left::before{content:'';position:absolute;width:600px;height:600px;background:radial-gradient(circle,rgba(46,139,101,.2) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);animation:breathe 6s ease-in-out infinite;}
+    @keyframes breathe{0%,100%{transform:translate(-50%,-50%) scale(1);opacity:.6}50%{transform:translate(-50%,-50%) scale(1.2);opacity:1}}
+    .split-brand{position:relative;z-index:1;text-align:center;}
+    .split-logo{font-family:'Fraunces',serif;font-size:72px;font-weight:900;color:white;letter-spacing:-.05em;line-height:.9;margin-bottom:20px;}
+    .split-logo em{color:#7DD5A8;font-style:italic;display:block;}
+    .split-tagline{font-size:13px;font-weight:400;color:rgba(255,255,255,.35);letter-spacing:.2em;text-transform:uppercase;}
+    .split-dots{display:flex;gap:8px;justify-content:center;margin-top:48px;}
+    .split-dot{width:6px;height:6px;border-radius:50%;background:rgba(46,139,101,.3);}
+    .split-dot.active{background:var(--sage);box-shadow:0 0 0 3px rgba(46,139,101,.2);}
+    .split-right{width:480px;background:var(--ink2);display:flex;align-items:center;justify-content:center;padding:48px;border-left:1px solid var(--border);position:relative;}
+    .login-card{width:100%;}
+    .header{margin-bottom:40px;}
+    .header-pre{font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--sage);margin-bottom:10px;}
+    .header h2{font-family:'Fraunces',serif;font-size:36px;font-weight:900;color:white;letter-spacing:-.04em;line-height:1;}
+    .header p{font-size:14px;color:var(--t3);margin-top:8px;}
+    .role-switch{display:flex;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:14px;padding:5px;margin-bottom:36px;position:relative;}
+    .role-btn{flex:1;padding:11px;border:none;background:none;color:var(--t3);font-size:13px;font-weight:700;cursor:pointer;position:relative;z-index:2;transition:.3s;letter-spacing:.04em;text-transform:uppercase;}
+    .role-btn.active{color:white;}
+    .role-pill{position:absolute;top:5px;left:5px;width:calc(50% - 5px);height:calc(100% - 10px);background:linear-gradient(135deg,var(--sage) 0%,#25a070 100%);border-radius:10px;transition:.4s cubic-bezier(.16,1,.3,1);z-index:1;box-shadow:0 4px 16px rgba(46,139,101,.4);}
+    .role-switch[data-role="RIDER"] .role-pill{transform:translateX(100%);}
+    .form-group{margin-bottom:24px;}
+    label{display:block;font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.12em;margin-bottom:10px;}
+    input{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:14px;padding:14px 18px;color:white;font-family:'Outfit',sans-serif;font-size:16px;outline:none;transition:.3s;}
+    input:focus{border-color:var(--sage);background:rgba(46,139,101,.06);box-shadow:0 0 0 3px rgba(46,139,101,.12);}
+    input::placeholder{color:rgba(255,255,255,.2);}
+    .pw-wrap{position:relative;}
+    .pw-wrap input{padding-right:52px;}
+    .pw-toggle{position:absolute;right:16px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(255,255,255,.3);cursor:pointer;padding:4px;display:flex;align-items:center;transition:.2s;}
+    .pw-toggle:hover{color:rgba(255,255,255,.6);}
+    .pw-toggle svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;}
+    .btn-login{width:100%;background:linear-gradient(135deg,var(--sage) 0%,#25a070 100%);color:white;border:none;border-radius:14px;padding:16px;font-size:15px;font-weight:700;cursor:pointer;transition:.3s cubic-bezier(.16,1,.3,1);margin-top:8px;letter-spacing:.04em;text-transform:uppercase;box-shadow:0 8px 28px rgba(46,139,101,.35);}
+    .btn-login:hover{transform:translateY(-2px);box-shadow:0 14px 40px rgba(46,139,101,.5);}
+    .error-msg{background:rgba(255,71,71,.1);border:1px solid rgba(255,71,71,.2);color:#ff7676;padding:12px 16px;border-radius:12px;font-size:13px;margin-bottom:24px;display:none;text-align:center;}
+    .loader{display:none;width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+    .footer-note{text-align:center;font-size:13px;color:var(--t3);margin-top:28px;}
+    .footer-link{color:var(--sage);text-decoration:none;font-weight:600;}
+    .footer-link:hover{color:#7DD5A8;}
+    @media(max-width:768px){
+      .split-left{display:none;}
+      .split-right{width:100%;padding:40px 28px;}
+      body{justify-content:center;}
+    }
   </style>
 </head>
 <body>
-  <div class="bg-glow"></div>
-  <div class="login-card">
-    <div class="header">
-      <div class="logo">MCC SHOP</div>
-      <div class="subtitle" id="portalSub">Staff Portal</div>
-    </div>
-
-    <div class="role-switch" id="roleSwitch" data-role="ADMIN">
-      <div class="role-pill"></div>
-      <button class="role-btn active" onclick="setRole('ADMIN')">ADMIN</button>
-      <button class="role-btn" onclick="setRole('RIDER')">RIDER</button>
-    </div>
-
-    <div id="error" class="error-msg"></div>
-
-    <form id="loginForm">
-      <div class="form-group">
-        <label>Phone Number</label>
-        <input type="tel" id="phone" placeholder="020XXXXXXX" required>
+  <div class="split-left">
+    <div class="split-brand">
+      <div class="split-logo">MCC<em>Shop</em></div>
+      <div class="split-tagline">Accra's Premier Delivery Platform</div>
+      <div class="split-dots">
+        <div class="split-dot active"></div>
+        <div class="split-dot"></div>
+        <div class="split-dot"></div>
       </div>
-      <div class="form-group">
-        <label>Password</label>
-        <div class="pw-wrap">
-          <input type="password" id="password" placeholder="••••••••" required>
-          <button type="button" class="pw-toggle" onclick="togglePw()" id="pwToggle" aria-label="Show password">
-            <svg id="eyeIcon" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-          </button>
+    </div>
+  </div>
+  <div class="split-right">
+    <div class="login-card">
+      <div class="header">
+        <div class="header-pre">Staff Portal</div>
+        <h2>Welcome back</h2>
+        <p>Sign in to manage the MCC Shop</p>
+      </div>
+      <div class="role-switch" id="roleSwitch" data-role="ADMIN">
+        <div class="role-pill"></div>
+        <button class="role-btn active" onclick="setRole('ADMIN')">Admin</button>
+        <button class="role-btn" onclick="setRole('RIDER')">Rider</button>
+      </div>
+      <div id="error" class="error-msg"></div>
+      <form id="loginForm">
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="tel" id="phone" placeholder="020 XXX XXXX" required>
         </div>
-      </div>
-      <button type="submit" class="btn-login" id="submitBtn">
-        <span id="btnText">Log In</span>
-        <div id="loader" class="loader"></div>
-      </button>
-    </form>
-    <div class="footer-note">Back to <a href="/" class="footer-link">The Shop</a></div>
+        <div class="form-group">
+          <label>Password</label>
+          <div class="pw-wrap">
+            <input type="password" id="password" placeholder="••••••••••" required>
+            <button type="button" class="pw-toggle" onclick="togglePw()" id="pwToggle" aria-label="Show password">
+              <svg id="eyeIcon" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+        <button type="submit" class="btn-login" id="submitBtn">
+          <span id="btnText">Sign In</span>
+          <div id="loader" class="loader"></div>
+        </button>
+      </form>
+      <div class="footer-note">Back to <a href="/" class="footer-link">The Shop</a></div>
+    </div>
   </div>
 
   <script>
@@ -95,8 +120,8 @@
     function setRole(role) {
       currentRole = role;
       document.getElementById('roleSwitch').setAttribute('data-role', role);
-      document.querySelectorAll('.role-btn').forEach(b => b.classList.toggle('active', b.innerText === role));
-      document.getElementById('portalSub').innerText = role === 'ADMIN' ? 'Admin Management' : 'Rider Dispatch';
+      document.querySelectorAll('.role-btn').forEach(b => b.classList.toggle('active', b.innerText.toUpperCase() === role));
+      const portalSub = document.getElementById('portalSub'); if(portalSub) portalSub.innerText = role === 'ADMIN' ? 'Admin Management' : 'Rider Dispatch';
     }
 
     document.getElementById('loginForm').onsubmit = async (e) => {
