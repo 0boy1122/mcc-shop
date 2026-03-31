@@ -47,16 +47,16 @@ router.post("/login", async (req, res, next) => {
 
     // Check if this is a staff login attempt (ADMIN or RIDER)
     if (role && (role === "ADMIN" || role === "RIDER")) {
-      const staffPassword = process.env.STAFF_PASSWORD;
+      const adminPassword = process.env.ADMIN_PASSWORD;
+      const riderPassword = process.env.RIDER_PASSWORD;
+      const expectedPassword = role === "ADMIN" ? adminPassword : riderPassword;
 
-      if (!staffPassword) {
-        console.error("STAFF_PASSWORD not configured in environment");
-        return res.status(500).json({ error: "Staff login not configured" });
+      if (!expectedPassword) {
+        console.error(`${role}_PASSWORD not configured in environment`);
+        return res.status(500).json({ error: `${role} login not configured. Contact the administrator.` });
       }
 
-      // Verify staff password
-      if (password === staffPassword) {
-        // Create a virtual staff user object for this session
+      if (password === expectedPassword) {
         const staffUser = {
           id: `${role.toLowerCase()}-${phone}`,
           name: role === "ADMIN" ? "Admin" : "Rider",
