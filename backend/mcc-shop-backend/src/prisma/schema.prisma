@@ -45,6 +45,7 @@ model Product {
   isFragile     Boolean      @default(false)
   isHazardous   Boolean      @default(false)
   images        String?      // SQLite doesn't support String[] - use JSON string
+  notes         String?      // e.g. "colours:White,Magnolia,Ivory"
   isPublished   Boolean      @default(false)
   mvpPriority   Boolean      @default(false)
   createdAt     DateTime     @default(now())
