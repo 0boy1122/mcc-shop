@@ -217,6 +217,10 @@ nav.scrolled{background:rgba(249,246,240,.96);backdrop-filter:blur(32px) saturat
 .pcard-price-unit{font-size:12px;font-weight:400;color:var(--t3);font-family:'DM Sans',sans-serif;margin-top:3px;}
 .pcard-bulk{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,var(--mist),rgba(194,220,206,.4));color:var(--sage2);font-size:11px;font-weight:600;border-radius:100px;padding:5px 14px;margin-top:10px;border:1px solid var(--mist2);}
 .pcard-bulk::before{content:'★';font-size:9px;}
+.pcard-colours{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;}
+.clr-pill{padding:4px 12px;border-radius:100px;font-size:11px;font-weight:600;border:1px solid var(--border2);background:var(--cream2);color:var(--t2);transition:all .15s;line-height:1.4;}
+.clr-pill.on{background:var(--ink);border-color:var(--ink);color:white;}
+.clr-pill:hover:not(.on){background:var(--mist);border-color:var(--sage);color:var(--sage2);}
 .pcard-foot{padding:16px 24px 20px;border-top:1px solid rgba(13,26,18,.06);display:flex;gap:8px;align-items:center;background:var(--white);position:relative;z-index:1;transition:background .3s;}
 .pcard:hover .pcard-foot{background:var(--cream);}
 .qty-ctrl{display:flex;align-items:center;background:var(--cream2);border:1px solid var(--cream3);border-radius:12px;overflow:hidden;flex-shrink:0;}
@@ -789,7 +793,7 @@ const getLoc=()=>'Accra';
 const om=(p,q)=>`Hi The MCC Shop! I'd like to order:\n\n• ${p.name} (${p.sku})\n  Unit: ${p.unit} × ${q}\n  Price: GHS ${(p.price*q).toLocaleString()} (VAT inclusive)\n  Delivery Mode: ${p.mode} ${DI[p.mode]}\n  Location: ${getLoc()}\n\nPlease confirm availability and delivery in Accra. Thank you!`;
 const bm=(items, name, phone, address, notes, vehicle)=>{
   let m=`Hi The MCC Shop! I'd like to place an order:\n\n*Customer Details:*\n• Name: ${name}\n• Phone: ${phone}\n• Address: ${address}\n${notes ? '• Notes: '+notes+'\n' : ''}\n*Items:*\n`;
-  items.forEach(i=>{m+=`• ${i.name} (${i.sku}) × ${i.qty} — GHS ${(i.price*i.qty).toLocaleString()}\n`;});
+  items.forEach(i=>{const colNote=i.selectedColour?` [${i.selectedColour}]`:'';m+=`• ${i.name}${colNote} × ${i.qty} — GHS ${(i.price*i.qty).toLocaleString()}\n`;});
   const t=items.reduce((s,i)=>s+i.price*i.qty,0);
   m+=`\n*Total:* GHS ${t.toLocaleString()} (VAT incl.)\n*Vehicle:* ${vehicle} ${DI[vehicle] || ''}\n\nPlease confirm my order. Thank you!`;
   return m;
@@ -826,6 +830,11 @@ const bm=(items, name, phone, address, notes, vehicle)=>{
       { skuCode: "BED-UPH-QN",     name: "Queen Size Upholstered Bed",   category: "Furniture",  unitSize: "Unit",      sellingPrice: 2000, bulkThreshold: 2, dispatchMode: "VAN",  images: "/bed_queen.jpg" },
     ];
 
+    const parseColours = notes => {
+      if (!notes) return null;
+      const m = notes.match(/colours:(.+)/);
+      return m ? m[1].split(',').map(c=>c.trim()) : null;
+    };
     const mapProduct = p => ({
       sku: p.skuCode,
       cat: p.category || 'Other',
@@ -836,7 +845,8 @@ const bm=(items, name, phone, address, notes, vehicle)=>{
       bulkPrice: p.bulkPrice || null,
       mode: p.dispatchMode === 'VAN' ? 'Van' : (p.dispatchMode === 'PICKUP' ? 'Pickup' : 'Bike'),
       icon: CI[p.category] || '📦',
-      img: p.images || null
+      img: p.images || null,
+      colours: parseColours(p.notes)
     });
 
     // Show skeleton placeholders while loading
@@ -930,7 +940,7 @@ function renderGrid(){
   <div class="pcard-body" onclick="openModal('${p.sku}')">
     <div class="pcard-top"><span class="pcard-cat">${p.cat}</span><span class="pcard-sku">${p.sku}</span></div>
     <div class="pcard-name">${p.name}</div>
-    <div class="pcard-unit">📐 ${p.unit}</div>
+    ${p.colours ? `<div class="pcard-colours">${p.colours.map((c,ci)=>`<button class="clr-pill${ci===0?' on':''}" onclick="selectColour(this,'${p.sku}',event)" data-colour="${c}">${c}</button>`).join('')}</div>` : `<div class="pcard-unit">📐 ${p.unit}</div>`}
     <div class="pcard-price-area">
       <div class="pcard-price">GHS ${p.price.toLocaleString()}<span class="pcard-price-unit">/ ${p.unit}</span></div>
       <div class="pcard-bulk">Bulk discount at ${p.bulk}+</div>
@@ -1019,20 +1029,30 @@ function renderCart(){
     body.innerHTML=`<div class="cart-empty"><div class="cart-empty-i">🛒</div><div class="cart-empty-t">Your list is empty</div><div class="cart-empty-d">Browse the catalogue and add items to build your order</div></div>`;
     foot.style.display='none';return;
   }
-  body.innerHTML=items.map(i=>`<div class="citem"><div class="citem-ic">${i.icon}</div><div class="citem-info"><div class="citem-n">${i.name}</div><div class="citem-d">${i.sku} · ${i.unit} × ${i.qty}</div></div><div class="citem-p">GHS ${(i.price*i.qty).toLocaleString()}</div><button class="citem-rm" onclick="rmCart('${i.sku}')">×</button></div>`).join('');
+  body.innerHTML=items.map(i=>{const key=i.selectedColour?`${i.sku}__${i.selectedColour}`:i.sku;const colNote=i.selectedColour?`<span style="color:var(--sage);font-weight:700"> · ${i.selectedColour}</span>`:'';return`<div class="citem"><div class="citem-ic">${i.icon}</div><div class="citem-info"><div class="citem-n">${i.name}${colNote}</div><div class="citem-d">${i.sku} · ${i.unit} × ${i.qty}</div></div><div class="citem-p">GHS ${(i.price*i.qty).toLocaleString()}</div><button class="citem-rm" onclick="rmCart('${key}')">×</button></div>`}).join('');
   const t=items.reduce((s,i)=>s+i.price*i.qty,0);
   document.getElementById('ctot-v').textContent='GHS '+t.toLocaleString();
   foot.style.display='block';
 }
-function rmCart(sku){delete cart[sku];updBdg();renderCart();}
+function rmCart(key){delete cart[key];updBdg();renderCart();}
+function selectColour(btn, sku, e){
+  if(e) e.stopPropagation();
+  btn.closest('.pcard-colours').querySelectorAll('.clr-pill').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  selectedColours[sku] = btn.dataset.colour;
+}
+const selectedColours = {};
+
 function addToCart(sku, e, q=null){
   if(e) e.stopPropagation();
-  const qty = q || parseInt(document.getElementById('cq-'+sku).textContent);
-  if(cart[sku]){
-    cart[sku].qty += qty;
+  const qty = q || parseInt(document.getElementById('cq-'+sku)?.textContent || '1');
+  const p = P.find(x=>x.sku===sku);
+  const colour = selectedColours[sku] || (p?.colours?.[0]) || null;
+  const key = colour ? `${sku}__${colour}` : sku;
+  if(cart[key]){
+    cart[key].qty += qty;
   } else {
-    const p = P.find(x=>x.sku===sku);
-    cart[sku] = {...p, qty: qty};
+    cart[key] = {...p, qty: qty, selectedColour: colour};
   }
   updBdg();
   openCart();
