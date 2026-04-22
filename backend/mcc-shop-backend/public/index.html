@@ -780,7 +780,7 @@ footer{background:var(--ink);padding:88px 56px 0;}
 
 <script>
 const WA='233303978485';
-const CI={All:'🏪',Paints:'🎨',Adhesives:'🔧',Safety:'⛑️',Tools:'🔨',Electrical:'💡',Plumbing:'🚿',Hardware:'🔩',Office:'🪑',Panels:'🏗️'};
+const CI={All:'🏪',Paints:'🎨',Boards:'🪵',Panels:'🏗️',Furniture:'🛋️',Adhesives:'🔧',Safety:'⛑️',Tools:'🔨',Electrical:'💡',Plumbing:'🚿',Hardware:'🔩',Office:'🪑'};
 const DI={Bike:'🏍️',Van:'🚐',Pickup:'🛻'};
 let P=[],ac='All',sq='',cart={},cp=null,mq=1;
 
@@ -813,16 +813,17 @@ const bm=(items, name, phone, address, notes, vehicle)=>{
 
     // Fallback list — used only if API is unreachable
     const FALLBACK_PRODUCTS = [
-      { skuCode: "PNT-001", name: "Emulsion Paint", category: "Paints", unitSize: "5 Gallon", sellingPrice: 780, bulkThreshold: 5, dispatchMode: "VAN", images: "/emulsion_paint.png" },
-      { skuCode: "PNT-002", name: "Gloss Paint", category: "Paints", unitSize: "1 Gallon", sellingPrice: 220, bulkThreshold: 10, dispatchMode: "BIKE", images: "/oil_paint.png" },
-      { skuCode: "ADH-001", name: "Silicone Sealant", category: "Adhesives", unitSize: "Tube", sellingPrice: 38, bulkThreshold: 20, dispatchMode: "BIKE", images: "/silicon_sealant.png" },
-      { skuCode: "SAF-001", name: "Safety Helmet", category: "Safety", unitSize: "Unit", sellingPrice: 75, bulkThreshold: 10, dispatchMode: "BIKE", images: "/helmet.png" },
-      { skuCode: "TLS-001", name: "Trowel", category: "Tools", unitSize: "Unit", sellingPrice: 40, bulkThreshold: 20, dispatchMode: "BIKE", images: "/trowel.png" },
-      { skuCode: "ELE-001", name: "LED Bulb", category: "Electrical", unitSize: "12W", sellingPrice: 28, bulkThreshold: 50, dispatchMode: "BIKE", images: "/led_bulb.png" },
-      { skuCode: "PLM-001", name: "Faucet", category: "Plumbing", unitSize: "Unit", sellingPrice: 160, bulkThreshold: 5, dispatchMode: "BIKE", images: "/faucet.png" },
-      { skuCode: "HDR-001", name: "Door Lock", category: "Hardware", unitSize: "Unit", sellingPrice: 190, bulkThreshold: 5, dispatchMode: "BIKE", images: "/locks.png" },
-      { skuCode: "OFF-001", name: "Home Chair", category: "Office", unitSize: "Unit", sellingPrice: 820, bulkThreshold: 2, dispatchMode: "VAN", images: "/office_chairs.jpeg" },
-      { skuCode: "PAN-001", name: "PVC Ceiling Panel", category: "Panels", unitSize: "Length", sellingPrice: 115, bulkThreshold: 50, dispatchMode: "PICKUP", images: "/ceiling_panel.jpeg" }
+      { skuCode: "PNT-EMU-WHITE",  name: "MCC White Emulsion Paint",    category: "Paints",     unitSize: "20 Litres", sellingPrice: 300, bulkThreshold: 5, dispatchMode: "VAN",  images: "/mcc_emulsion_paint.jpeg" },
+      { skuCode: "PNT-EMU-MAGNOLIA", name: "MCC Magnolia Emulsion Paint", category: "Paints",   unitSize: "20 Litres", sellingPrice: 300, bulkThreshold: 5, dispatchMode: "VAN",  images: "/mcc_emulsion_paint.jpeg" },
+      { skuCode: "PNT-OIL-WHITE",  name: "Oil Paint – White",            category: "Paints",     unitSize: "4 Litres",  sellingPrice: 200, bulkThreshold: 10, dispatchMode: "BIKE", images: "/oil_paint.png" },
+      { skuCode: "PNT-OIL-DKBROWN",name: "Oil Paint – Dark Brown",       category: "Paints",     unitSize: "4 Litres",  sellingPrice: 200, bulkThreshold: 10, dispatchMode: "BIKE", images: "/oil_paint.png" },
+      { skuCode: "PLB-9MM-001",    name: "Plasterboard 9mm",             category: "Boards",     unitSize: "Sheet",     sellingPrice: 150, bulkThreshold: 20, dispatchMode: "VAN",  images: "/plasterboard_9mm.jpg" },
+      { skuCode: "PLB-12MM-001",   name: "Plasterboard 12mm",            category: "Boards",     unitSize: "Sheet",     sellingPrice: 200, bulkThreshold: 20, dispatchMode: "VAN",  images: "/plasterboard_12mm.jpg" },
+      { skuCode: "JNT-CMP-001",    name: "Joint Compound",               category: "Boards",     unitSize: "20 Litres", sellingPrice: 350, bulkThreshold: 5,  dispatchMode: "VAN",  images: "/joint_compound.jpg" },
+      { skuCode: "PVC-WH-001",     name: "PVC Ceiling Panels – White",   category: "Panels",     unitSize: "Per Piece", sellingPrice: 60,  bulkThreshold: 50, dispatchMode: "VAN",  images: "/ceiling_panel.jpeg" },
+      { skuCode: "SFA-FAB-3S",     name: "3-Seater Fabric Sofa",         category: "Furniture",  unitSize: "Unit",      sellingPrice: 2500, bulkThreshold: 2, dispatchMode: "VAN",  images: "/sofa_fabric_3s.jpg" },
+      { skuCode: "DIN-4ST-001",    name: "4-Seater Dining Set",          category: "Furniture",  unitSize: "Set",       sellingPrice: 4500, bulkThreshold: 2, dispatchMode: "VAN",  images: "/dining_4s.jpg" },
+      { skuCode: "BED-UPH-QN",     name: "Queen Size Upholstered Bed",   category: "Furniture",  unitSize: "Unit",      sellingPrice: 2000, bulkThreshold: 2, dispatchMode: "VAN",  images: "/bed_queen.jpg" },
     ];
 
     const mapProduct = p => ({
@@ -923,7 +924,7 @@ function renderGrid(){
   g.innerHTML=f.map((p,i)=>`
 <div class="pcard" style="animation-delay:${i*.05}s" data-sku="${p.sku}">
   <div class="pcard-img" onclick="openModal('${p.sku}')" style="cursor:pointer;overflow:hidden;">
-    ${p.img ? `<img src="${p.img}" style="width:100%;height:100%;object-fit:cover;" onerror="this.outerHTML='<div class=pcard-em>${p.icon}</div>'">` : `<div class="pcard-em">${p.icon}</div>`}
+    ${p.img ? `<img src="${p.img}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none';this.insertAdjacentHTML('afterend','<div class=pcard-em>${p.icon}</div>')">` : `<div class="pcard-em">${p.icon}</div>`}
     <div class="pcard-badges"><span class="badge-vat">VAT Incl.</span><span class="badge-del">${DI[p.mode]||''} ${p.mode}</span></div>
   </div>
   <div class="pcard-body" onclick="openModal('${p.sku}')">
