@@ -38,9 +38,17 @@ router.post("/chat", async (req, res, next) => {
     if (!messages || !Array.isArray(messages)) {
       return res.status(400).json({ error: "Invalid messages format" });
     }
+    if (messages.length > 20) {
+      return res.status(400).json({ error: "Too many messages in conversation" });
+    }
+    for (const msg of messages) {
+      if (typeof msg.content !== "string" || msg.content.length > 2000) {
+        return res.status(400).json({ error: "Message too long (max 2000 characters)" });
+      }
+    }
 
     // Configure the model
-    const model = genAI.getGenerativeModel({ 
+    const model = genAI.getGenerativeModel({
       model: "gemini-1.5-flash",
       systemInstruction: PRODUCT_CONTEXT
     });
@@ -50,7 +58,7 @@ router.post("/chat", async (req, res, next) => {
       role: msg.role === "assistant" ? "model" : "user",
       parts: [{ text: msg.content }]
     }));
-    
+
     const latestMessage = messages[messages.length - 1].content;
 
     // Start a chat session

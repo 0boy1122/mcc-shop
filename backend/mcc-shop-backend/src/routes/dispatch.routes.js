@@ -13,7 +13,16 @@ const storage = multer.diskStorage({
     cb(null, `proof-${Date.now()}${path.extname(file.originalname)}`);
   },
 });
-const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
+const ALLOWED_PROOF_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (ALLOWED_PROOF_TYPES.includes(file.mimetype)) return cb(null, true);
+    cb(new Error("Only image files are allowed (jpeg, png, webp)"));
+  },
+});
 
 // GET /api/dispatch/available  – pending orders for riders to pick up
 router.get("/available", authenticate, authorize("RIDER"), async (req, res, next) => {
@@ -102,14 +111,20 @@ router.post(
     try {
       if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
+      const rider = await prisma.rider.findUnique({ where: { userId: req.user.id } });
+      if (!rider) return res.status(404).json({ error: "Rider profile not found" });
+
+      // Verify this rider owns the order before marking delivered
+      const order = await prisma.order.findUnique({ where: { id: req.params.orderId } });
+      if (!order) return res.status(404).json({ error: "Order not found" });
+      if (order.riderId !== rider.id) return res.status(403).json({ error: "Not your order" });
+
       const proofUrl = `/uploads/proofs/${req.file.filename}`;
 
       await prisma.dispatchLog.update({
         where: { orderId: req.params.orderId },
         data: { proofPhotoUrl: proofUrl, deliveredAt: new Date() },
       });
-
-      const rider = await prisma.rider.findUnique({ where: { userId: req.user.id } });
 
       await prisma.$transaction([
         prisma.order.update({

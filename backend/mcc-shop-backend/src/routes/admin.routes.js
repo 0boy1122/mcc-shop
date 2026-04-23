@@ -7,15 +7,21 @@ const path = require("path");
 const router = express.Router();
 
 // ── Image Upload Setup ─────────────────────────────
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+
 const storage = multer.diskStorage({
   destination: "uploads/products/",
   filename: (req, file, cb) => {
     cb(null, `prod-${Date.now()}${path.extname(file.originalname)}`);
   },
 });
-const upload = multer({ 
-    storage, 
-    limits: { fileSize: 20 * 1024 * 1024 } // 20MB limit for mobile phone photos
+const upload = multer({
+  storage,
+  limits: { fileSize: 20 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (ALLOWED_IMAGE_TYPES.includes(file.mimetype)) return cb(null, true);
+    cb(new Error("Only image files are allowed (jpeg, png, webp, gif)"));
+  },
 });
 
 // POST /api/admin/products/upload – upload an image
@@ -30,10 +36,24 @@ router.use(authenticate, authorize("ADMIN"));
 
 // ── Products ─────────────────────────────────────────
 
+const PRODUCT_FIELDS = [
+  "name", "skuCode", "category", "description", "sellingPrice", "costPrice",
+  "stockQty", "unit", "images", "notes", "isPublished", "dispatchMode",
+  "bulkThreshold", "bulkPrice", "lowStockAlert", "mvpPriority",
+];
+
+function pickProductFields(body) {
+  const data = {};
+  for (const key of PRODUCT_FIELDS) {
+    if (key in body) data[key] = body[key];
+  }
+  return data;
+}
+
 // POST /api/admin/products  – create new product
 router.post("/products", async (req, res, next) => {
   try {
-    const product = await prisma.product.create({ data: req.body });
+    const product = await prisma.product.create({ data: pickProductFields(req.body) });
     res.status(201).json({ product });
   } catch (err) {
     next(err);
@@ -45,7 +65,7 @@ router.put("/products/:id", async (req, res, next) => {
   try {
     const product = await prisma.product.update({
       where: { id: req.params.id },
-      data: req.body,
+      data: pickProductFields(req.body),
     });
     res.json({ product });
   } catch (err) {
@@ -88,8 +108,16 @@ router.get("/orders", async (req, res, next) => {
     if (status) where.status = status;
     if (from || to) {
       where.createdAt = {};
-      if (from) where.createdAt.gte = new Date(from);
-      if (to) where.createdAt.lte = new Date(to);
+      if (from) {
+        const d = new Date(from);
+        if (isNaN(d.getTime())) return res.status(400).json({ error: "Invalid 'from' date" });
+        where.createdAt.gte = d;
+      }
+      if (to) {
+        const d = new Date(to);
+        if (isNaN(d.getTime())) return res.status(400).json({ error: "Invalid 'to' date" });
+        where.createdAt.lte = d;
+      }
     }
 
     const orders = await prisma.order.findMany({

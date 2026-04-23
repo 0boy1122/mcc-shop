@@ -8,6 +8,8 @@ const router = express.Router();
 router.get("/", async (req, res, next) => {
   try {
     const { category, search, dispatch, limit = 50, offset = 0 } = req.query;
+    const safeLimit = Math.min(Math.max(1, Number(limit) || 50), 200);
+    const safeOffset = Math.max(0, Number(offset) || 0);
 
     const where = { isPublished: true };
     if (category) where.category = { equals: category, mode: "insensitive" };
@@ -20,17 +22,20 @@ router.get("/", async (req, res, next) => {
       ];
     }
 
-    const [products, total] = await Promise.all([
+    const [rawProducts, total] = await Promise.all([
       prisma.product.findMany({
         where,
-        take: Number(limit),
-        skip: Number(offset),
+        take: safeLimit,
+        skip: safeOffset,
         orderBy: [{ mvpPriority: "desc" }, { name: "asc" }],
       }),
       prisma.product.count({ where }),
     ]);
 
-    res.json({ products, total, limit: Number(limit), offset: Number(offset) });
+    // Never expose internal cost price to public
+    const products = rawProducts.map(({ costPrice: _, ...p }) => p);
+
+    res.json({ products, total, limit: safeLimit, offset: safeOffset });
   } catch (err) {
     next(err);
   }
@@ -53,12 +58,13 @@ router.get("/categories", async (req, res, next) => {
 // GET /api/products/:id  – single product
 router.get("/:id", async (req, res, next) => {
   try {
-    const product = await prisma.product.findUnique({
+    const raw = await prisma.product.findUnique({
       where: { id: req.params.id },
     });
-    if (!product || !product.isPublished) {
+    if (!raw || !raw.isPublished) {
       return res.status(404).json({ error: "Product not found" });
     }
+    const { costPrice: _, ...product } = raw;
     res.json({ product });
   } catch (err) {
     next(err);

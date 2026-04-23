@@ -6,6 +6,7 @@ const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
 const path = require("path");
+const rateLimit = require("express-rate-limit");
 
 const authRoutes = require("./routes/auth.routes");
 const productRoutes = require("./routes/product.routes");
@@ -19,52 +20,122 @@ const { errorHandler } = require("./middleware/error.middleware");
 const app = express();
 const server = http.createServer(app);
 
-// ── Socket.io for real-time rider tracking ────────────
+// ── Socket.io ─────────────────────────────────────────
 const io = new Server(server, {
   cors: { origin: process.env.CLIENT_URL, methods: ["GET", "POST"] },
 });
 
-io.on("connection", (socket) => {
-  console.log("Socket connected:", socket.id);
+io.use((socket, next) => {
+  // Require auth token for socket connections
+  const token = socket.handshake.auth?.token;
+  if (!token) return next(new Error("Authentication required"));
+  try {
+    const jwt = require("jsonwebtoken");
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    socket.userId = decoded.userId;
+    socket.userRole = decoded.role;
+    next();
+  } catch {
+    next(new Error("Invalid token"));
+  }
+});
 
-  // Rider sends GPS update → broadcast to customer watching their order
+io.on("connection", (socket) => {
+  // Rider sends GPS update — only allow if socket is a RIDER
   socket.on("rider:location", ({ orderId, lat, lng }) => {
+    if (socket.userRole !== "RIDER" && socket.userRole !== "ADMIN") return;
+    if (!orderId || typeof lat !== "number" || typeof lng !== "number") return;
     io.to(`order:${orderId}`).emit("rider:location", { lat, lng });
   });
 
   // Customer joins a room to track their order
   socket.on("track:order", (orderId) => {
+    if (typeof orderId !== "string" || orderId.length > 64) return;
     socket.join(`order:${orderId}`);
   });
 
-  socket.on("disconnect", () => {
-    console.log("Socket disconnected:", socket.id);
-  });
+  socket.on("disconnect", () => {});
 });
 
-// Make io accessible in route handlers
 app.set("io", io);
 
-// ── Middleware ─────────────────────────────────────────
+// ── Security Middleware ────────────────────────────────
 app.use(helmet({
-  contentSecurityPolicy: false, // Relax for static HTML testing
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://fonts.gstatic.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
+      imgSrc: ["'self'", "data:", "https:", "blob:"],
+      connectSrc: ["'self'", "https://api.paystack.co", "wss:", "ws:"],
+      mediaSrc: ["'self'"],
+      objectSrc: ["'none'"],
+    },
+  },
 }));
-app.use(cors({ origin: true, credentials: true }));
-app.use(morgan("dev"));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  "https://mccshopghana.com",
+  "https://www.mccshopghana.com",
+  ...(process.env.NODE_ENV !== "production"
+    ? ["http://localhost:3000", "http://localhost:5000"]
+    : []),
+].filter(Boolean);
+
+app.use(cors({
+  origin: (origin, cb) => {
+    if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+    cb(new Error("Not allowed by CORS"));
+  },
+  credentials: true,
+}));
+
+app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
+
+// ── Rate Limiters ──────────────────────────────────────
+// Strict limiter for auth endpoints (brute-force protection)
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10,
+  message: { error: "Too many attempts. Please try again in 15 minutes." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// General API limiter
+const apiLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 120,
+  message: { error: "Too many requests. Please slow down." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// AI chat limiter (expensive per call)
+const aiLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 15,
+  message: { error: "Too many AI requests. Please wait a moment." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.use(express.json({ limit: "2mb" }));
+app.use(express.urlencoded({ extended: true, limit: "2mb" }));
 
 // Serve frontend and images from the 'public' folder
 app.use(express.static(path.join(__dirname, "../public")));
 
 // ── Routes ─────────────────────────────────────────────
-app.use("/api/auth", authRoutes);
-app.use("/api/products", productRoutes);
-app.use("/api/orders", orderRoutes);
-app.use("/api/payments", paymentRoutes);
-app.use("/api/dispatch", dispatchRoutes);
-app.use("/api/admin", adminRoutes);
-app.use("/api/ai", aiRoutes);
+app.use("/api/auth", authLimiter, authRoutes);
+app.use("/api/products", apiLimiter, productRoutes);
+app.use("/api/orders", apiLimiter, orderRoutes);
+app.use("/api/payments", paymentRoutes); // webhook needs raw body, limiter inside
+app.use("/api/dispatch", apiLimiter, dispatchRoutes);
+app.use("/api/admin", apiLimiter, adminRoutes);
+app.use("/api/ai", aiLimiter, aiRoutes);
 
 // ── Health check ───────────────────────────────────────
 app.get("/health", (req, res) => {
