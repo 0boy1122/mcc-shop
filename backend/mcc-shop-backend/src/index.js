@@ -20,44 +20,50 @@ const { errorHandler } = require("./middleware/error.middleware");
 const app = express();
 const server = http.createServer(app);
 
-// ── Socket.io ─────────────────────────────────────────
-const io = new Server(server, {
-  cors: { origin: process.env.CLIENT_URL, methods: ["GET", "POST"] },
-});
+// ── Socket.io (disabled on Vercel serverless) ─────────
+// Vercel functions are stateless — WebSockets require a persistent server.
+// Socket.io is initialised only when running as a real Node.js process.
+const isServerless = !!process.env.VERCEL;
 
-io.use((socket, next) => {
-  // Require auth token for socket connections
-  const token = socket.handshake.auth?.token;
-  if (!token) return next(new Error("Authentication required"));
-  try {
-    const jwt = require("jsonwebtoken");
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    socket.userId = decoded.userId;
-    socket.userRole = decoded.role;
-    next();
-  } catch {
-    next(new Error("Invalid token"));
-  }
-});
-
-io.on("connection", (socket) => {
-  // Rider sends GPS update — only allow if socket is a RIDER
-  socket.on("rider:location", ({ orderId, lat, lng }) => {
-    if (socket.userRole !== "RIDER" && socket.userRole !== "ADMIN") return;
-    if (!orderId || typeof lat !== "number" || typeof lng !== "number") return;
-    io.to(`order:${orderId}`).emit("rider:location", { lat, lng });
+let io;
+if (!isServerless) {
+  io = new Server(server, {
+    cors: { origin: process.env.CLIENT_URL, methods: ["GET", "POST"] },
   });
 
-  // Customer joins a room to track their order
-  socket.on("track:order", (orderId) => {
-    if (typeof orderId !== "string" || orderId.length > 64) return;
-    socket.join(`order:${orderId}`);
+  io.use((socket, next) => {
+    const token = socket.handshake.auth?.token;
+    if (!token) return next(new Error("Authentication required"));
+    try {
+      const jwt = require("jsonwebtoken");
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      socket.userId = decoded.userId;
+      socket.userRole = decoded.role;
+      next();
+    } catch {
+      next(new Error("Invalid token"));
+    }
   });
 
-  socket.on("disconnect", () => {});
-});
+  io.on("connection", (socket) => {
+    socket.on("rider:location", ({ orderId, lat, lng }) => {
+      if (socket.userRole !== "RIDER" && socket.userRole !== "ADMIN") return;
+      if (!orderId || typeof lat !== "number" || typeof lng !== "number") return;
+      io.to(`order:${orderId}`).emit("rider:location", { lat, lng });
+    });
 
-app.set("io", io);
+    socket.on("track:order", (orderId) => {
+      if (typeof orderId !== "string" || orderId.length > 64) return;
+      socket.join(`order:${orderId}`);
+    });
+
+    socket.on("disconnect", () => {});
+  });
+}
+
+// No-op emitter so dispatch routes don't crash when io is unavailable
+const noopIo = { to: () => ({ emit: () => {} }) };
+app.set("io", io || noopIo);
 
 // ── Security Middleware ────────────────────────────────
 app.use(helmet({
@@ -153,10 +159,14 @@ app.use((req, res) => {
 // ── Error handler ──────────────────────────────────────
 app.use(errorHandler);
 
-// ── Start server ───────────────────────────────────────
-const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
-  console.log(`\n🚀 MCC Shop API running on port ${PORT}`);
-  console.log(`📦 Environment: ${process.env.NODE_ENV}`);
-  console.log(`🔗 Health: http://localhost:${PORT}/health\n`);
-});
+// ── Start server (skipped on Vercel — Vercel manages the HTTP layer) ──────
+if (!isServerless) {
+  const PORT = process.env.PORT || 5000;
+  server.listen(PORT, () => {
+    console.log(`\n🚀 MCC Shop API running on port ${PORT}`);
+    console.log(`📦 Environment: ${process.env.NODE_ENV}`);
+    console.log(`🔗 Health: http://localhost:${PORT}/health\n`);
+  });
+}
+
+module.exports = app;

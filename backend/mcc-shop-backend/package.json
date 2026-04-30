@@ -9,7 +9,8 @@
   "scripts": {
     "dev": "nodemon src/index.js",
     "start": "node src/index.js",
-    "build": "npx prisma generate --schema=src/prisma/schema.prisma && npx prisma db push --schema=src/prisma/schema.prisma && npm run db:seed",
+    "build": "npx prisma generate --schema=src/prisma/schema.prisma",
+    "db:setup": "npx prisma db push --schema=src/prisma/schema.prisma && node src/prisma/seed.js",
     "db:migrate": "npx prisma migrate dev --schema=src/prisma/schema.prisma",
     "db:generate": "npx prisma generate --schema=src/prisma/schema.prisma",
     "db:seed": "node src/prisma/seed.js",

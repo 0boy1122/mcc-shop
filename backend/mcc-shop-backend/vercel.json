@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "buildCommand": "npx prisma generate --schema=src/prisma/schema.prisma",
+  "installCommand": "npm install",
+  "functions": {
+    "src/index.js": {
+      "memory": 1024,
+      "maxDuration": 30,
+      "includeFiles": "public/**"
+    }
+  },
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/src/index.js" }
+  ]
+}
