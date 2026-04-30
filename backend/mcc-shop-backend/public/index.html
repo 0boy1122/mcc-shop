@@ -1155,58 +1155,30 @@ function openCheckout(){
 async function submitCheckout(e){
   e.preventDefault();
   const btn = document.getElementById('chkBtn');
-  btn.textContent = 'Processing...'; btn.disabled = true;
+  const name    = document.getElementById('chkName').value.trim();
+  const phone   = document.getElementById('chkPhone').value.trim();
+  const address = document.getElementById('chkAddress').value.trim();
+  const notes   = document.getElementById('chkNotes').value.trim();
 
-  const items = Object.values(cart).map(i => ({ productId: i.sku, quantity: i.qty }));
-  let baseUrl = window.location.protocol === 'file:' ? 'http://localhost:5000' : '';
+  if(!name || !phone || !address){
+    showToast('Please fill in your name, phone, and address.', 'error');
+    return;
+  }
+
   let bestMod = 'BIKE';
-  if(Object.values(cart).some(i=>i.mode==='Van')) bestMod = 'VAN';
+  if(Object.values(cart).some(i=>i.mode==='Van'))    bestMod = 'VAN';
   if(Object.values(cart).some(i=>i.mode==='Pickup')) bestMod = 'PICKUP';
 
-  try {
-    const res = await fetch(baseUrl + '/api/orders/guest', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name: document.getElementById('chkName').value,
-        phone: document.getElementById('chkPhone').value,
-        deliveryAddress: document.getElementById('chkAddress').value,
-        notes: document.getElementById('chkNotes').value,
-        vehicleType: bestMod,
-        items
-      })
-    });
-    
-    if(!res.ok) {
-      const err = await res.json();
-      throw new Error(err.error || 'Checkout failed');
-    }
-    
-    
-    const waMsg = bm(
-      Object.values(cart), 
-      document.getElementById('chkName').value,
-      document.getElementById('chkPhone').value,
-      document.getElementById('chkAddress').value,
-      document.getElementById('chkNotes').value,
-      bestMod
-    );
-    
-    window.open(wl(waMsg), '_blank');
-    
-    showToast('Order saved! Sending to WhatsApp for finalization.', 'success');
-    
-    // Clear cart and reset UI
-    cart = {};
-    updBdg();
-    renderCart();
-    document.getElementById('checkoutForm').reset();
-    document.getElementById('chkOvl').classList.remove('open');
-    closeCart();
-  } catch(err) {
-    showToast('Error: ' + err.message, 'error');
-    btn.textContent = 'Confirm & Place Order'; btn.disabled = false;
-  }
+  const waMsg = bm(Object.values(cart), name, phone, address, notes, bestMod);
+  window.open(wl(waMsg), '_blank');
+
+  showToast('Opening WhatsApp to complete your order!', 'success');
+  cart = {};
+  updBdg();
+  renderCart();
+  document.getElementById('checkoutForm').reset();
+  document.getElementById('chkOvl').classList.remove('open');
+  closeCart();
 }
 
 /* ── TOAST ── */
