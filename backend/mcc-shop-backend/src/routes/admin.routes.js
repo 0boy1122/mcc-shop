@@ -86,6 +86,49 @@ router.delete("/products/:id", async (req, res, next) => {
   }
 });
 
+// PATCH /api/admin/products/:id/publish  – toggle publish status
+router.patch("/products/:id/publish", async (req, res, next) => {
+  try {
+    const current = await prisma.product.findUnique({ where: { id: req.params.id }, select: { isPublished: true } });
+    if (!current) return res.status(404).json({ error: "Product not found" });
+    const product = await prisma.product.update({
+      where: { id: req.params.id },
+      data: { isPublished: !current.isPublished },
+    });
+    res.json({ product, published: product.isPublished });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// PATCH /api/admin/products/:id/stock  – set or adjust stock quantity
+// Body: { op: "set"|"adjust", qty: number, reason?: string }
+router.patch("/products/:id/stock", async (req, res, next) => {
+  try {
+    const { op, qty, reason } = req.body;
+    if (!["set", "adjust"].includes(op)) {
+      return res.status(400).json({ error: "op must be 'set' or 'adjust'" });
+    }
+    const parsedQty = parseInt(qty);
+    if (isNaN(parsedQty)) return res.status(400).json({ error: "qty must be a number" });
+
+    const current = await prisma.product.findUnique({ where: { id: req.params.id }, select: { stockQty: true, name: true } });
+    if (!current) return res.status(404).json({ error: "Product not found" });
+
+    const newQty = op === "set" ? Math.max(0, parsedQty) : Math.max(0, current.stockQty + parsedQty);
+    const product = await prisma.product.update({
+      where: { id: req.params.id },
+      data: { stockQty: newQty },
+    });
+    res.json({
+      product,
+      stockUpdate: { op, previous: current.stockQty, change: newQty - current.stockQty, current: newQty, reason: reason || null },
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // GET /api/admin/products  – all products including unpublished
 router.get("/products", async (req, res, next) => {
   try {
@@ -137,6 +180,71 @@ router.get("/orders", async (req, res, next) => {
   }
 });
 
+// PATCH /api/admin/orders/:id/status  – update order status + auto-deduct stock on CONFIRMED
+router.patch("/orders/:id/status", async (req, res, next) => {
+  try {
+    const { status } = req.body;
+    const validStatuses = ["CONFIRMED", "DISPATCHED", "DELIVERED", "CANCELLED"];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ error: `Invalid status. Must be one of: ${validStatuses.join(", ")}` });
+    }
+
+    const existing = await prisma.order.findUnique({
+      where: { id: req.params.id },
+      include: { items: true },
+    });
+    if (!existing) return res.status(404).json({ error: "Order not found" });
+
+    // Prevent going backwards (e.g. DELIVERED → PENDING)
+    const statusRank = { PENDING: 0, CONFIRMED: 1, DISPATCHED: 2, DELIVERED: 3, CANCELLED: 4 };
+    if (statusRank[status] < statusRank[existing.status] && status !== "CANCELLED") {
+      return res.status(400).json({ error: `Cannot move order from ${existing.status} back to ${status}` });
+    }
+
+    const order = await prisma.$transaction(async (tx) => {
+      const updated = await tx.order.update({ where: { id: req.params.id }, data: { status } });
+
+      // On CANCELLED: restore stock that was deducted when order was placed
+      if (status === "CANCELLED" && existing.status === "PENDING") {
+        for (const item of existing.items) {
+          await tx.product.update({
+            where: { id: item.productId },
+            data: { stockQty: { increment: item.quantity } },
+          });
+        }
+      }
+      return updated;
+    });
+
+    const io = req.app.get("io");
+    if (io) io.to(`order:${order.id}`).emit("order:status", { orderId: order.id, status });
+
+    res.json({ order });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// PATCH /api/admin/orders/:id/rider  – assign a rider to an order
+router.patch("/orders/:id/rider", async (req, res, next) => {
+  try {
+    const { riderId } = req.body;
+    if (!riderId) return res.status(400).json({ error: "riderId is required" });
+
+    const rider = await prisma.rider.findUnique({ where: { id: riderId } });
+    if (!rider) return res.status(404).json({ error: "Rider not found" });
+
+    const order = await prisma.order.update({
+      where: { id: req.params.id },
+      data: { riderId, status: "DISPATCHED" },
+      include: { rider: { include: { user: { select: { name: true, phone: true } } } } },
+    });
+    res.json({ order });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // ── Analytics ────────────────────────────────────────
 
 // GET /api/admin/analytics  – dashboard stats
@@ -156,9 +264,9 @@ router.get("/analytics", async (req, res, next) => {
       prisma.order.count({ where: { status: "PENDING" } }),
       prisma.order.count({ where: { status: "DELIVERED" } }),
       prisma.product.findMany({
-        where: { stockQty: { lte: 10 } },
+        where: { isPublished: true },
         select: { name: true, skuCode: true, stockQty: true, lowStockAlert: true },
-      }),
+      }).then(products => products.filter(p => p.stockQty <= (p.lowStockAlert ?? 10))),
       prisma.user.count({ where: { role: "CUSTOMER" } }),
       prisma.rider.count(),
     ]);
