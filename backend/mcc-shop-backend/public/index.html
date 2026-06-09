@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>The MCC Shop — Home, Office & Construction Site Delivery | Accra</title>
 <meta name="description" content="Premium Deco building materials, paints, kitchen cabinets &amp; installation, sofas, beds, wardrobes, dining sets &amp; office furniture — delivered door-to-door across every neighbourhood in Accra.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -520,12 +520,21 @@ footer{background:#040404;padding:80px 56px 0;border-top:1px solid rgba(255,255,
   .foot-top{grid-template-columns:1fr;gap:28px;}
   footer{padding:40px 16px 0;}
   #chkOvl{padding:0;align-items:flex-end;}
-  #chkOvl .mdl{border-radius:0;max-height:90vh;max-width:100%;}
+  #chkOvl .mdl{border-radius:0;max-height:92vh;max-width:100%;overflow-y:auto;}
   .ann{padding:8px 0;}
   .ann-item{font-size:10px;}
 }
 
 /* ══ TOAST ══ */
+@media(max-width:380px){
+  .pgrid{grid-template-columns:1fr;}
+  .pcard-img{aspect-ratio:16/11;}
+  .pcard-name{font-size:16px;}
+  .pcard-price{font-size:22px;}
+  .order-btn{min-height:44px;font-size:11px;}
+  .filter-bar{margin-left:-14px;margin-right:-14px;padding-left:14px;padding-right:14px;}
+}
+
 .toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%) translateY(16px);background:#151515;color:var(--t1);padding:12px 24px;border-radius:2px;font-size:13px;font-weight:400;z-index:9000;opacity:0;transition:all .3s;pointer-events:none;border:1px solid rgba(255,255,255,.08);white-space:nowrap;max-width:90vw;text-align:center;letter-spacing:.04em;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 .toast.success{border-color:rgba(201,150,63,.25);color:var(--gold);}
@@ -577,16 +586,16 @@ footer{background:#040404;padding:80px 56px 0;border-top:1px solid rgba(255,255,
     <svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 001.97 1.61h9.72a2 2 0 001.97-1.61L23 6H6"/></svg>
     Cart<div id="bnav-bdg" class="bnav-bdg" style="display:none">0</div>
   </a>
-  <a href="/mcc-company-profile.pdf" target="_blank" class="bnav-btn"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>About</a>
+  <a href="mcc-company-profile.pdf" target="_blank" class="bnav-btn"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>About</a>
 </div>
 
 <!-- MOBILE SEARCH OVERLAY -->
 <div id="srchOverlay" class="srch-overlay" onclick="if(event.target===this)closeMobileSearch()">
   <div class="srch-overlay-bar">
     <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-    <input id="si-mobile" type="text" placeholder="Search products…" oninput="doMobileSearch()" autofocus>
+    <input id="si-mobile" type="text" placeholder="Search products..." oninput="doMobileSearch()" autofocus>
   </div>
-  <button class="srch-overlay-close" onclick="closeMobileSearch()">✕ Close</button>
+  <button class="srch-overlay-close" onclick="closeMobileSearch()">Close</button>
 </div>
 
 <!-- ANNOUNCE -->
@@ -596,14 +605,14 @@ footer{background:#040404;padding:80px 56px 0;border-top:1px solid rgba(255,255,
     <span class="ann-item">Bike · Van · Pickup delivery</span><span class="ann-sep">✦</span>
     <span class="ann-item">All prices VAT inclusive</span><span class="ann-sep">✦</span>
     <span class="ann-item">Bulk order discounts</span><span class="ann-sep">✦</span>
-    <span class="ann-item">Secure Checkout + WhatsApp</span><span class="ann-sep">✦</span>
+    <span class="ann-item">WhatsApp quotes and ordering</span><span class="ann-sep">✦</span>
     <span class="ann-item">Construction site delivery</span><span class="ann-sep">✦</span>
     <span class="ann-item">Home &amp; office delivery</span><span class="ann-sep">✦</span>
     <span class="ann-item">Delivering across all of Accra</span><span class="ann-sep">✦</span>
     <span class="ann-item">Bike · Van · Pickup delivery</span><span class="ann-sep">✦</span>
     <span class="ann-item">All prices VAT inclusive</span><span class="ann-sep">✦</span>
     <span class="ann-item">Bulk order discounts</span><span class="ann-sep">✦</span>
-    <span class="ann-item">Secure Checkout + WhatsApp</span><span class="ann-sep">✦</span>
+    <span class="ann-item">WhatsApp quotes and ordering</span><span class="ann-sep">✦</span>
     <span class="ann-item">Construction site delivery</span><span class="ann-sep">✦</span>
     <span class="ann-item">Home &amp; office delivery</span><span class="ann-sep">✦</span>
     <span class="ann-item">Kitchen cabinets &amp; installation</span><span class="ann-sep">✦</span>
@@ -629,7 +638,7 @@ footer{background:#040404;padding:80px 56px 0;border-top:1px solid rgba(255,255,
 <!-- NAV -->
 <nav id="nav">
   <a href="#" class="nl">
-    <img src="/mcc_logo.png" alt="The MCC Shop" class="nl-logo-img">
+    <img src="mcc_logo.png" alt="The MCC Shop" class="nl-logo-img">
   </a>
   <div class="nav-mid">
     <div class="nav-links">
@@ -646,7 +655,7 @@ footer{background:#040404;padding:80px 56px 0;border-top:1px solid rgba(255,255,
         </select>
       </div>
       <button class="nav-link on" onclick="scrollTo('products')">Shop</button>
-      <a href="/mcc-company-profile.pdf" target="_blank" class="nav-link">About</a>
+      <a href="mcc-company-profile.pdf" target="_blank" class="nav-link">About</a>
       <a href="https://wa.me/233509919161?text=Hi%2C%20I%20have%20a%20question%20about%20The%20MCC%20Shop" target="_blank" class="nav-link">Contact</a>
     </div>
   </div>
@@ -841,7 +850,7 @@ footer{background:#040404;padding:80px 56px 0;border-top:1px solid rgba(255,255,
       </div>
       <button class="mdl-wa" style="background:var(--ink); margin-top: 10px; border:none; cursor:pointer;" onclick="addToCart(cp.sku, null, mq); closeModal(); openCheckout();">
         <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" width="22" height="22"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0110 0v4"></path></svg>
-        Instant Secure Checkout
+        Request Quote on WhatsApp
       </button>
       <div style="display:flex; gap:10px; margin-top:10px;">
         <button class="mdl-wa" style="flex:1; background:#0D1A12; border:none; cursor:pointer;" onclick="addToCart(cp.sku, null, mq); closeModal();">
@@ -862,7 +871,7 @@ footer{background:#040404;padding:80px 56px 0;border-top:1px solid rgba(255,255,
     <div class="ctot-row"><span class="ctot-l">Estimated Total</span><span class="ctot-v" id="ctot-v">GHS 0</span></div>
     <button class="csend" onclick="openCheckout()" style="background:var(--ink); border:none; cursor:pointer;">
       <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" width="19" height="19"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0110 0v4"></path></svg>
-      Secure Checkout
+      Request Quote
     </button>
   </div>
 </div>
@@ -871,7 +880,7 @@ footer{background:#040404;padding:80px 56px 0;border-top:1px solid rgba(255,255,
 <div id="chkOvl" class="ovl" onclick="if(event.target===this) this.classList.remove('open')">
   <div class="mdl">
     <div class="mdl-head">
-      <div class="mdl-hwrap"><div class="mdl-cat">Live Order</div><div class="mdl-name">Secure Checkout</div></div>
+      <div class="mdl-hwrap"><div class="mdl-cat">WhatsApp Enquiry</div><div class="mdl-name">Request a Quote</div></div>
       <button class="mdl-x" onclick="document.getElementById('chkOvl').classList.remove('open')">✕</button>
     </div>
     <form id="checkoutForm" onsubmit="submitCheckout(event)" style="padding:24px;">
@@ -882,7 +891,10 @@ footer{background:#040404;padding:80px 56px 0;border-top:1px solid rgba(255,255,
         <input type="text" id="chkNotes" placeholder="Delivery Notes (Optional)" style="width:100%; padding:12px 16px; border-radius:10px; border:1px solid var(--border); font-family:inherit; font-size: 16px;">
       </div>
       <button type="submit" id="chkBtn" style="width:100%; margin-top:24px; padding:16px; background:var(--ink); color:white; border:none; border-radius:12px; font-weight:600; font-size:15px; cursor:pointer;">
-        Confirm & Place Order
+        Send Quote Request on WhatsApp
+      </button>
+      <button type="button" id="copyOrderBtn" onclick="copyOrderSummary()" style="width:100%; margin-top:10px; padding:13px; background:transparent; color:var(--t1); border:1px solid var(--border); border-radius:12px; font-weight:600; font-size:14px; cursor:pointer;">
+        Copy Order Summary
       </button>
     </form>
   </div>
@@ -893,6 +905,8 @@ const WA='233509919161';
 const CI={All:'🏪',Paints:'🎨',Boards:'🪵',Panels:'🏗️',Furniture:'🛋️',Imported:'🚢',Office:'🖥️',Kitchens:'🍳',Wardrobes:'🗄️',Doors:'🚪',Windows:'🪟',Flooring:'🏡',Adhesives:'🔧',Safety:'⛑️',Tools:'🔨',Electrical:'💡',Plumbing:'🚿',Hardware:'🔩'};
 const DI={Bike:'🏍️',Van:'🚐',Pickup:'🛻'};
 let P=[],ac='All',sq='',cart={},cp=null,mq=1;
+const CART_KEY='mcc_quote_cart';
+const CUSTOMER_KEY='mcc_quote_customer';
 
 const wl=msg=>`https://wa.me/${WA}?text=${encodeURIComponent(msg)}`;
 const getLoc=()=>'Accra';
@@ -914,6 +928,66 @@ const bm=(items, name, phone, address, notes, vehicle)=>{
   m+=`\n\nPlease confirm my order. Thank you!`;
   return m;
 };
+
+function cleanQuoteMessage(items, name, phone, address, notes, vehicle){
+  let msg=`Hi The MCC Shop! I'd like to request a quote:\n\n*Customer Details:*\n- Name: ${name}\n- Phone: ${phone}\n- Address: ${address}\n${notes ? '- Notes: '+notes+'\n' : ''}\n*Items:*\n`;
+  items.forEach(item=>{
+    const colour=item.selectedColour?` [${item.selectedColour}]`:'';
+    const unitPrice=(item.bulkPrice && item.qty>=item.bulk)?item.bulkPrice:item.price;
+    const lineTotal=unitPrice*item.qty;
+    const bulkNote=(item.bulkPrice && item.qty>=item.bulk)?' (bulk rate)':'';
+    msg+=`- ${item.name}${colour} x ${item.qty} - GHS ${lineTotal.toLocaleString()}${bulkNote}\n`;
+  });
+  const total=items.reduce((sum,item)=>{
+    const unitPrice=(item.bulkPrice && item.qty>=item.bulk)?item.bulkPrice:item.price;
+    return sum+(unitPrice*item.qty);
+  },0);
+  msg+=`\n*Estimated Total:* GHS ${total.toLocaleString()} (VAT incl.)\n*Likely Vehicle:* ${vehicle}`;
+  if(items.some(item=>item.imported)){
+    msg+=`\n\n*Shipping Notice:* One or more items are GECHI luxury imports shipped directly from China. Estimated delivery: 20-30 days. Please confirm availability and payment terms.`;
+  }
+  msg+=`\n\nPlease confirm availability, delivery fee, and payment terms. Thank you!`;
+  return msg;
+}
+
+function saveCart(){
+  try{localStorage.setItem(CART_KEY,JSON.stringify(cart));}catch(e){}
+}
+
+function loadCart(){
+  try{cart=JSON.parse(localStorage.getItem(CART_KEY)||'{}')||{};}catch(e){cart={};}
+  updBdg();
+}
+
+function saveCustomerDetails(){
+  const data={
+    name:document.getElementById('chkName')?.value.trim()||'',
+    phone:document.getElementById('chkPhone')?.value.trim()||'',
+    address:document.getElementById('chkAddress')?.value.trim()||'',
+    notes:document.getElementById('chkNotes')?.value.trim()||''
+  };
+  try{localStorage.setItem(CUSTOMER_KEY,JSON.stringify(data));}catch(e){}
+}
+
+function restoreCustomerDetails(){
+  let data={};
+  try{data=JSON.parse(localStorage.getItem(CUSTOMER_KEY)||'{}')||{};}catch(e){}
+  [['chkName','name'],['chkPhone','phone'],['chkAddress','address'],['chkNotes','notes']].forEach(([id,key])=>{
+    const el=document.getElementById(id);
+    if(el && data[key]) el.value=data[key];
+  });
+}
+
+function getQuoteMessageFromForm(){
+  const name=document.getElementById('chkName').value.trim();
+  const phone=document.getElementById('chkPhone').value.trim();
+  const address=document.getElementById('chkAddress').value.trim();
+  const notes=document.getElementById('chkNotes').value.trim();
+  let bestMod='Bike';
+  if(Object.values(cart).some(item=>item.mode==='Van')) bestMod='Van';
+  if(Object.values(cart).some(item=>item.mode==='Pickup')) bestMod='Pickup';
+  return cleanQuoteMessage(Object.values(cart),name,phone,address,notes,bestMod);
+}
 
 /* ── INIT ── */
 (function() {
@@ -1051,6 +1125,10 @@ const bm=(items, name, phone, address, notes, vehicle)=>{
       const m = notes.match(/colours:(.+)/);
       return m ? m[1].split(',').map(c=>c.trim()) : null;
     };
+    const assetPath = value => {
+      if (!value) return null;
+      return String(value).replace(/^\/+/, '');
+    };
     const mapProduct = p => ({
       sku: p.skuCode,
       cat: p.category || 'Other',
@@ -1061,7 +1139,7 @@ const bm=(items, name, phone, address, notes, vehicle)=>{
       bulkPrice: p.bulkPrice || null,
       mode: p.dispatchMode === 'VAN' ? 'Van' : (p.dispatchMode === 'PICKUP' ? 'Pickup' : 'Bike'),
       icon: CI[p.category] || '📦',
-      img: p.images || null,
+      img: assetPath(p.images),
       colours: parseColours(p.notes),
       imported: !!(p.notes && p.notes.includes('import:China'))
     });
@@ -1071,7 +1149,7 @@ const bm=(items, name, phone, address, notes, vehicle)=>{
     P = FALLBACK_PRODUCTS.map(mapProduct);
 
     try {
-      buildTabs(); renderGrid(); buildHeroFeat(); buildFCats();
+      buildTabs(); renderGrid(); buildHeroFeat(); buildFCats(); loadCart(); restoreCustomerDetails();
       initCursor(); initReveal(); initNav(); initCanvas(); initMagneticCards();
     } catch(e) {
       console.error("Initialization error:", e);
@@ -1243,7 +1321,7 @@ function renderCart(){
   document.getElementById('ctot-v').textContent='GHS '+t.toLocaleString();
   foot.style.display='block';
 }
-function rmCart(key){delete cart[key];updBdg();renderCart();}
+function rmCart(key){delete cart[key];saveCart();updBdg();renderCart();}
 function selectColour(btn, sku, e){
   if(e) e.stopPropagation();
   btn.closest('.pcard-colours').querySelectorAll('.clr-pill').forEach(b=>b.classList.remove('on'));
@@ -1263,6 +1341,7 @@ function addToCart(sku, e, q=null){
   } else {
     cart[key] = {...p, qty: qty, selectedColour: colour};
   }
+  saveCart();
   updBdg();
   openCart();
 }
@@ -1275,6 +1354,7 @@ function updBdg(){
 }
 
 function openCheckout(){
+  restoreCustomerDetails();
   document.getElementById('chkOvl').classList.add('open');
 }
 
@@ -1286,6 +1366,11 @@ async function submitCheckout(e){
   const address = document.getElementById('chkAddress').value.trim();
   const notes   = document.getElementById('chkNotes').value.trim();
 
+  if(!Object.keys(cart).length){
+    showToast('Add at least one item before requesting a quote.', 'error');
+    return;
+  }
+
   if(!name || !phone || !address){
     showToast('Please fill in your name, phone, and address.', 'error');
     return;
@@ -1295,16 +1380,46 @@ async function submitCheckout(e){
   if(Object.values(cart).some(i=>i.mode==='Van'))    bestMod = 'Van';
   if(Object.values(cart).some(i=>i.mode==='Pickup')) bestMod = 'Pickup';
 
-  const waMsg = bm(Object.values(cart), name, phone, address, notes, bestMod);
+  saveCustomerDetails();
+  const waMsg = cleanQuoteMessage(Object.values(cart), name, phone, address, notes, bestMod);
   window.open(wl(waMsg), '_blank');
 
-  showToast('Opening WhatsApp to complete your order!', 'success');
+  showToast('Opening WhatsApp to send your quote request.', 'success');
   cart = {};
+  saveCart();
   updBdg();
   renderCart();
   document.getElementById('checkoutForm').reset();
   document.getElementById('chkOvl').classList.remove('open');
   closeCart();
+}
+
+async function copyOrderSummary(){
+  const name=document.getElementById('chkName').value.trim();
+  const phone=document.getElementById('chkPhone').value.trim();
+  const address=document.getElementById('chkAddress').value.trim();
+  if(!Object.keys(cart).length){
+    showToast('Add at least one item before copying.', 'error');
+    return;
+  }
+  if(!name || !phone || !address){
+    showToast('Fill in your name, phone, and address first.', 'error');
+    return;
+  }
+  saveCustomerDetails();
+  const msg=getQuoteMessageFromForm();
+  try{
+    await navigator.clipboard.writeText(msg);
+    showToast('Order summary copied. You can paste it into WhatsApp.', 'success');
+  }catch(e){
+    const box=document.createElement('textarea');
+    box.value=msg;
+    document.body.appendChild(box);
+    box.select();
+    document.execCommand('copy');
+    box.remove();
+    showToast('Order summary copied. You can paste it into WhatsApp.', 'success');
+  }
 }
 
 /* ── TOAST ── */
@@ -1358,7 +1473,8 @@ function initReveal(){
 
 <!-- ══ AI WIDGET STYLES ══ -->
 <style>
-.ai-fab{position:fixed;bottom:28px;right:28px;z-index:800;width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#1A6B45 0%,#0C4229 100%);border:none;box-shadow:0 8px 32px rgba(26,107,69,.45),0 2px 8px rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;transition:transform .3s cubic-bezier(.16,1,.3,1),box-shadow .3s;cursor:pointer!important;}
+.ai-fab{position:fixed;bottom:28px;right:28px;z-index:800;width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#1A6B45 0%,#0C4229 100%);border:none;box-shadow:0 8px 32px rgba(26,107,69,.45),0 2px 8px rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;transition:transform .3s cubic-bezier(.16,1,.3,1),box-shadow .3s;cursor:grab!important;touch-action:none;user-select:none;}
+.ai-fab.dragging{cursor:grabbing!important;transition:none;transform:scale(1.04);}
 .ai-fab:hover{transform:scale(1.1) translateY(-2px);box-shadow:0 14px 44px rgba(26,107,69,.55),0 4px 12px rgba(0,0,0,.25);}
 .ai-fab.open{transform:scale(1.05);}
 .ai-fab-icon{display:flex;align-items:center;justify-content:center;transition:transform .3s;}
@@ -1414,7 +1530,7 @@ function initReveal(){
 
 @media(max-width:480px){
   .ai-panel{width:calc(100vw - 24px);right:12px;bottom:88px;}
-  .ai-fab{bottom:80px;right:16px;} /* Moved up to clear bottom nav */
+  .ai-fab{bottom:140px;right:16px;}
 }
 </style>
 
@@ -1433,7 +1549,7 @@ function initReveal(){
     </div>
     <div class="ai-head-info">
       <div class="ai-head-name">MCC Shop Assistant</div>
-      <div class="ai-head-status">Online · Powered by AI</div>
+      <div class="ai-head-status">Online - catalogue guide</div>
     </div>
     <button class="ai-head-close" onclick="toggleAI()">✕</button>
   </div>
@@ -1446,12 +1562,12 @@ function initReveal(){
     <button class="ai-chip" onclick="sendChip(this)">Safety equipment</button>
   </div>
   <div class="ai-input-row">
-    <textarea class="ai-input" id="aiInput" placeholder="Ask about products, delivery, bulk orders…" rows="1" onkeydown="aiKey(event)" oninput="aiResize(this)"></textarea>
+    <textarea class="ai-input" id="aiInput" placeholder="Ask about products, delivery, bulk orders..." rows="1" onkeydown="aiKey(event)" oninput="aiResize(this)"></textarea>
     <button class="ai-send" id="aiSendBtn" onclick="aiSend()">
       <svg viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
     </button>
   </div>
-  <div class="ai-footer-note">AI can make mistakes · Always verify with our team on WhatsApp</div>
+  <div class="ai-footer-note">Catalogue guide - verify availability with our team on WhatsApp</div>
 </div>
 
 <script>
@@ -1460,6 +1576,7 @@ const AI_OPEN = false;
 let aiOpen = false;
 let aiHistory = [];
 let aiTyping = false;
+let aiSuppressToggle = false;
 
 function buildProductContext(){
   const productContext = P.map(p => `${p.name} (${p.sku}): GHS ${p.price} / ${p.unit}, ${p.cat}, ${p.mode} delivery`).join('\n');
@@ -1482,13 +1599,96 @@ PERSONALITY: Be warm, helpful, concise. Speak like a knowledgeable Ghanaian shop
 const PRODUCT_CONTEXT = null; // replaced by buildProductContext() — called dynamically
 
 function toggleAI(){
+  if(aiSuppressToggle) return;
   aiOpen = !aiOpen;
   document.getElementById('aiFab').classList.toggle('open', aiOpen);
   document.getElementById('aiPanel').classList.toggle('open', aiOpen);
+  if(window.positionAIPanel) setTimeout(window.positionAIPanel, 0);
   if(aiOpen && aiHistory.length === 0){
     setTimeout(()=>addMsg('bot','Hello! 👋 I\'m your MCC Shop assistant. I can help you find products, check prices, and learn about delivery across Accra. What are you looking for today?'), 300);
   }
   if(aiOpen) setTimeout(()=>document.getElementById('aiInput').focus(), 400);
+}
+
+function initDraggableAI(){
+  const fab=document.getElementById('aiFab');
+  const panel=document.getElementById('aiPanel');
+  if(!fab) return;
+
+  const saved=localStorage.getItem('mcc_ai_fab_pos');
+  if(saved){
+    try{
+      const pos=JSON.parse(saved);
+      if(Number.isFinite(pos.left) && Number.isFinite(pos.top)){
+        fab.style.left=pos.left+'px';
+        fab.style.top=pos.top+'px';
+        fab.style.right='auto';
+        fab.style.bottom='auto';
+      }
+    }catch(e){}
+  }
+
+  let dragging=false,startX=0,startY=0,startLeft=0,startTop=0,moved=false;
+  const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
+  const positionPanel=()=>{
+    if(!panel || !aiOpen) return;
+    const r=fab.getBoundingClientRect();
+    const panelWidth=Math.min(380,window.innerWidth-24);
+    const left=clamp(r.left+r.width-panelWidth,12,window.innerWidth-panelWidth-12);
+    const top=clamp(r.top-610,12,window.innerHeight-220);
+    panel.style.left=left+'px';
+    panel.style.right='auto';
+    panel.style.bottom='auto';
+    panel.style.top=top+'px';
+  };
+  window.positionAIPanel=positionPanel;
+
+  fab.addEventListener('pointerdown',e=>{
+    if(e.button !== undefined && e.button !== 0) return;
+    const r=fab.getBoundingClientRect();
+    dragging=true;moved=false;
+    startX=e.clientX;startY=e.clientY;startLeft=r.left;startTop=r.top;
+    fab.classList.add('dragging');
+    fab.setPointerCapture?.(e.pointerId);
+  });
+
+  fab.addEventListener('pointermove',e=>{
+    if(!dragging) return;
+    const dx=e.clientX-startX,dy=e.clientY-startY;
+    if(Math.abs(dx)+Math.abs(dy)>6) moved=true;
+    const left=clamp(startLeft+dx,8,window.innerWidth-fab.offsetWidth-8);
+    const top=clamp(startTop+dy,8,window.innerHeight-fab.offsetHeight-8);
+    fab.style.left=left+'px';
+    fab.style.top=top+'px';
+    fab.style.right='auto';
+    fab.style.bottom='auto';
+    positionPanel();
+  });
+
+  fab.addEventListener('pointerup',e=>{
+    if(!dragging) return;
+    dragging=false;
+    fab.classList.remove('dragging');
+    fab.releasePointerCapture?.(e.pointerId);
+    const r=fab.getBoundingClientRect();
+    localStorage.setItem('mcc_ai_fab_pos',JSON.stringify({left:r.left,top:r.top}));
+    if(moved){
+      aiSuppressToggle=true;
+      setTimeout(()=>{aiSuppressToggle=false;},80);
+    }
+  });
+
+  window.addEventListener('resize',()=>{
+    const r=fab.getBoundingClientRect();
+    const left=clamp(r.left,8,window.innerWidth-fab.offsetWidth-8);
+    const top=clamp(r.top,8,window.innerHeight-fab.offsetHeight-8);
+    fab.style.left=left+'px';
+    fab.style.top=top+'px';
+    fab.style.right='auto';
+    fab.style.bottom='auto';
+    localStorage.setItem('mcc_ai_fab_pos',JSON.stringify({left,top}));
+    positionPanel();
+  });
 }
 
 function addMsg(role, text){
@@ -1605,6 +1805,8 @@ function aiResize(el){
   el.style.height='auto';
   el.style.height=Math.min(el.scrollHeight,100)+'px';
 }
+
+document.addEventListener('DOMContentLoaded', initDraggableAI);
 </script>
 <div id="toast" class="toast"></div>
 </body>
