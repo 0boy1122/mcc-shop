@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "npx prisma generate --schema=src/prisma/schema.prisma",
+  "buildCommand": "npm run build:prod",
   "installCommand": "npm install",
   "functions": {
     "src/index.js": {

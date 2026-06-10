@@ -136,6 +136,7 @@ app.use(express.urlencoded({ extended: true, limit: "2mb" }));
 
 // Serve frontend and images from the 'public' folder
 app.use(express.static(path.join(__dirname, "../public")));
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 // ── Routes ─────────────────────────────────────────────
 app.use("/api/auth", authLimiter, authRoutes);

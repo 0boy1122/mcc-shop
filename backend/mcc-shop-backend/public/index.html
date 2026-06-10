@@ -902,6 +902,7 @@ footer{background:#040404;padding:80px 56px 0;border-top:1px solid rgba(255,255,
 
 <script>
 const WA='233509919161';
+const API_URL = window.MCC_API_URL || (location.hostname.includes('mccshopghana.com') ? 'https://mcc-shop-backend.vercel.app/api' : '/api');
 const CI={All:'🏪',Paints:'🎨',Boards:'🪵',Panels:'🏗️',Furniture:'🛋️',Imported:'🚢',Office:'🖥️',Kitchens:'🍳',Wardrobes:'🗄️',Doors:'🚪',Windows:'🪟',Flooring:'🏡',Adhesives:'🔧',Safety:'⛑️',Tools:'🔨',Electrical:'💡',Plumbing:'🚿',Hardware:'🔩'};
 const DI={Bike:'🏍️',Van:'🚐',Pickup:'🛻'};
 let P=[],ac='All',sq='',cart={},cp=null,mq=1;
@@ -1127,7 +1128,12 @@ function getQuoteMessageFromForm(){
     };
     const assetPath = value => {
       if (!value) return null;
-      return String(value).replace(/^\/+/, '');
+      const src = String(value).trim();
+      if (/^https?:\/\//i.test(src)) return src;
+      if (src.startsWith('/uploads/') && /^https?:\/\//i.test(API_URL)) {
+        return new URL(src, API_URL).href;
+      }
+      return src.replace(/^\/+/, '');
     };
     const mapProduct = p => ({
       sku: p.skuCode,
@@ -1144,9 +1150,22 @@ function getQuoteMessageFromForm(){
       imported: !!(p.notes && p.notes.includes('import:China'))
     });
 
-    // Static product catalogue — served without a backend
+    async function loadCatalogProducts() {
+      try {
+        const res = await fetch(`${API_URL}/products?limit=200`, { cache: 'no-store' });
+        if (!res.ok) throw new Error('Product API unavailable');
+        const data = await res.json();
+        const apiProducts = Array.isArray(data.products) ? data.products : [];
+        return apiProducts.length ? apiProducts : FALLBACK_PRODUCTS;
+      } catch (err) {
+        console.warn('Using embedded product catalogue:', err.message || err);
+        return FALLBACK_PRODUCTS;
+      }
+    }
+
+    // Backend product catalogue first, embedded catalogue as fallback.
     showSkeletons();
-    P = FALLBACK_PRODUCTS.map(mapProduct);
+    P = (await loadCatalogProducts()).map(mapProduct);
 
     try {
       buildTabs(); renderGrid(); buildHeroFeat(); buildFCats(); loadCart(); restoreCustomerDetails();

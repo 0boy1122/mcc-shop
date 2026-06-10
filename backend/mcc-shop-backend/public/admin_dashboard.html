@@ -113,7 +113,7 @@
       background: rgba(46,139,101,0.1);
       color: var(--sage2);
       border-radius: 12px;
-      margin: 2px 8px;
+      margin: 2px 8px 8px 8px;
     }
 
     .nav-item svg {
@@ -711,8 +711,15 @@
   </style>
 
   <script>
-    const API_URL = '/api';
+    const API_URL = window.MCC_API_URL || (location.hostname.includes('mccshopghana.com') ? 'https://mcc-shop-backend.vercel.app/api' : '/api');
     const token = localStorage.getItem('mcc_token');
+    const resolveImageUrl = (value) => {
+      if (!value) return '';
+      const src = String(value).trim();
+      if (/^https?:\/\//i.test(src) || src.startsWith('data:')) return src;
+      if (src.startsWith('/uploads/') && /^https?:\/\//i.test(API_URL)) return new URL(src, API_URL).href;
+      return src;
+    };
 
     if (!token) {
       window.location.href = 'portal_login.html';
@@ -968,7 +975,7 @@
       document.getElementById('productModal').classList.add('open');
       
       try {
-        const res = await fetch(`${API_URL}/products/${id}`, {
+        const res = await fetch(`${API_URL}/admin/products/${id}`, {
           headers: { 'Authorization': 'Bearer ' + localStorage.getItem('mcc_token') }
         });
         const { product } = await res.json();
@@ -989,7 +996,7 @@
         const imageUrl = product.images || '';
         document.getElementById('pImageUrl').value = imageUrl;
         if (imageUrl) {
-          document.getElementById('imgPreview').innerHTML = `<img src="${imageUrl}" style="width:100%;height:100%;object-fit:cover;">`;
+          document.getElementById('imgPreview').innerHTML = `<img src="${resolveImageUrl(imageUrl)}" style="width:100%;height:100%;object-fit:cover;">`;
         } else {
           document.getElementById('imgPreview').innerHTML = '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="var(--t3)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>';
         }

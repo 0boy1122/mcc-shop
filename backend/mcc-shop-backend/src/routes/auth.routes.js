@@ -58,8 +58,8 @@ router.post("/login", async (req, res, next) => {
     // Staff login (ADMIN or RIDER)
     if (role === "ADMIN" || role === "RIDER") {
       const expectedPassword = role === "ADMIN"
-        ? process.env.ADMIN_PASSWORD
-        : process.env.RIDER_PASSWORD;
+        ? (process.env.ADMIN_PASSWORD || process.env.STAFF_PASSWORD)
+        : (process.env.RIDER_PASSWORD || process.env.STAFF_PASSWORD);
 
       if (!expectedPassword) {
         return res.status(500).json({ error: "Login not configured. Contact administrator." });

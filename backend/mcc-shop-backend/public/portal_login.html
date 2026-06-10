@@ -117,6 +117,7 @@
     }
 
     let currentRole = 'ADMIN';
+    const API_URL = window.MCC_API_URL || (location.hostname.includes('mccshopghana.com') ? 'https://mcc-shop-backend.vercel.app/api' : '/api');
     function setRole(role) {
       currentRole = role;
       document.getElementById('roleSwitch').setAttribute('data-role', role);
@@ -137,7 +138,7 @@
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 15000);
       try {
-        const res = await fetch('/api/auth/login', {
+        const res = await fetch(`${API_URL}/auth/login`, {
           method:'POST', headers:{'Content-Type':'application/json'},
           body: JSON.stringify({ phone, password, role: currentRole }),
           signal: controller.signal

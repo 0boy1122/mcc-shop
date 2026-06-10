@@ -3,20 +3,17 @@ const prisma = require("../lib/prisma");
 const { authenticate, authorize } = require("../middleware/auth.middleware");
 const multer = require("multer");
 const path = require("path");
+const fs = require("fs");
 
 const router = express.Router();
+const uploadDir = path.join(__dirname, "../../uploads/products");
+fs.mkdirSync(uploadDir, { recursive: true });
 
 // ── Image Upload Setup ─────────────────────────────
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 
-const storage = multer.diskStorage({
-  destination: "uploads/products/",
-  filename: (req, file, cb) => {
-    cb(null, `prod-${Date.now()}${path.extname(file.originalname)}`);
-  },
-});
 const upload = multer({
-  storage,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 20 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
     if (ALLOWED_IMAGE_TYPES.includes(file.mimetype)) return cb(null, true);
@@ -24,11 +21,33 @@ const upload = multer({
   },
 });
 
+async function storeProductImage(file) {
+  const ext = path.extname(file.originalname) || ".jpg";
+  const filename = `prod-${Date.now()}-${Math.random().toString(36).slice(2, 8)}${ext}`;
+
+  if (process.env.BLOB_READ_WRITE_TOKEN) {
+    const { put } = require("@vercel/blob");
+    const blob = await put(`products/${filename}`, file.buffer, {
+      access: "public",
+      contentType: file.mimetype,
+    });
+    return blob.url;
+  }
+
+  const filepath = path.join(uploadDir, filename);
+  await fs.promises.writeFile(filepath, file.buffer);
+  return `/uploads/products/${filename}`;
+}
+
 // POST /api/admin/products/upload – upload an image
-router.post("/products/upload", authenticate, authorize("ADMIN"), upload.single("image"), (req, res) => {
+router.post("/products/upload", authenticate, authorize("ADMIN"), upload.single("image"), async (req, res, next) => {
+  try {
     if (!req.file) return res.status(400).json({ error: "No file uploaded" });
-    const url = `/uploads/products/${req.file.filename}`;
+    const url = await storeProductImage(req.file);
     res.json({ url });
+  } catch (err) {
+    next(err);
+  }
 });
 
 // All admin routes require authentication + ADMIN role
@@ -37,9 +56,10 @@ router.use(authenticate, authorize("ADMIN"));
 // ── Products ─────────────────────────────────────────
 
 const PRODUCT_FIELDS = [
-  "name", "skuCode", "category", "description", "sellingPrice", "costPrice",
-  "stockQty", "unit", "images", "notes", "isPublished", "dispatchMode",
-  "bulkThreshold", "bulkPrice", "lowStockAlert", "mvpPriority",
+  "skuCode", "name", "brand", "category", "subCategory", "unitSize",
+  "costPrice", "sellingPrice", "vatIncluded", "bulkThreshold", "bulkPrice",
+  "stockQty", "lowStockAlert", "dispatchMode", "isFragile", "isHazardous",
+  "images", "notes", "isPublished", "mvpPriority",
 ];
 
 function pickProductFields(body) {
@@ -47,6 +67,26 @@ function pickProductFields(body) {
   for (const key of PRODUCT_FIELDS) {
     if (key in body) data[key] = body[key];
   }
+
+  const toBool = (value) => {
+    if (typeof value === "boolean") return value;
+    if (typeof value === "string") return ["true", "1", "yes", "on"].includes(value.toLowerCase());
+    return Boolean(value);
+  };
+
+  for (const key of ["costPrice", "sellingPrice", "bulkPrice"]) {
+    if (key in data && data[key] !== null && data[key] !== "") data[key] = Number(data[key]);
+    if (data[key] === "") data[key] = null;
+  }
+  for (const key of ["bulkThreshold", "stockQty", "lowStockAlert"]) {
+    if (key in data && data[key] !== null && data[key] !== "") data[key] = parseInt(data[key], 10);
+  }
+  for (const key of ["vatIncluded", "isFragile", "isHazardous", "isPublished", "mvpPriority"]) {
+    if (key in data) data[key] = toBool(data[key]);
+  }
+  if (!data.costPrice && data.costPrice !== 0) data.costPrice = 0;
+  if (!data.unitSize) data.unitSize = "Unit";
+  if (!data.dispatchMode) data.dispatchMode = "BIKE";
   return data;
 }
 
@@ -136,6 +176,16 @@ router.get("/products", async (req, res, next) => {
       orderBy: { createdAt: "desc" },
     });
     res.json({ products });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get("/products/:id", async (req, res, next) => {
+  try {
+    const product = await prisma.product.findUnique({ where: { id: req.params.id } });
+    if (!product) return res.status(404).json({ error: "Product not found" });
+    res.json({ product });
   } catch (err) {
     next(err);
   }

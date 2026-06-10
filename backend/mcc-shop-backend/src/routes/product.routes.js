@@ -12,13 +12,13 @@ router.get("/", async (req, res, next) => {
     const safeOffset = Math.max(0, Number(offset) || 0);
 
     const where = { isPublished: true };
-    if (category) where.category = { equals: category, mode: "insensitive" };
+    if (category) where.category = category;
     if (dispatch) where.dispatchMode = dispatch.toUpperCase();
     if (search) {
       where.OR = [
-        { name: { contains: search, mode: "insensitive" } },
-        { skuCode: { contains: search, mode: "insensitive" } },
-        { category: { contains: search, mode: "insensitive" } },
+        { name: { contains: search } },
+        { skuCode: { contains: search } },
+        { category: { contains: search } },
       ];
     }
 
