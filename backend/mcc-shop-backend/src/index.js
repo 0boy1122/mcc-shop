@@ -19,6 +19,7 @@ const { errorHandler } = require("./middleware/error.middleware");
 
 const app = express();
 const server = http.createServer(app);
+app.set("trust proxy", 1);
 
 // ── Socket.io (disabled on Vercel serverless) ─────────
 // Vercel functions are stateless — WebSockets require a persistent server.
