@@ -381,6 +381,8 @@ nav.scrolled{background:rgba(9,9,9,.88);backdrop-filter:blur(40px) saturate(1.4)
 .csend{display:flex;align-items:center;justify-content:center;gap:10px;background:rgba(201,150,63,.12);color:var(--gold);border:1px solid rgba(201,150,63,.3);border-radius:2px;padding:16px;font-size:14px;font-weight:500;width:100%;text-decoration:none;transition:var(--transition);letter-spacing:.06em;text-transform:uppercase;}
 .csend:hover{background:rgba(201,150,63,.2);border-color:rgba(201,150,63,.5);box-shadow:0 0 30px rgba(201,150,63,.08);}
 .csend svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;}
+.ccontinue{margin-bottom:10px;background:transparent;color:var(--t2);border:1px solid rgba(255,255,255,.12);cursor:pointer;}
+.ccontinue:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.22);box-shadow:none;color:var(--t1);}
 .cdwr-note{font-size:10px;color:var(--t4);text-align:center;margin-top:10px;line-height:1.7;}
 
 /* ══ FOOTER ══ */
@@ -848,12 +850,12 @@ footer{background:#040404;padding:80px 56px 0;border-top:1px solid rgba(255,255,
         </div>
         <div class="mdl-tot"><div class="mdl-tot-l">Total</div><div class="mdl-tot-v" id="mdl-tot"></div></div>
       </div>
-      <button class="mdl-wa" style="background:var(--ink); margin-top: 10px; border:none; cursor:pointer;" onclick="addToCart(cp.sku, null, mq); closeModal(); openCheckout();">
+      <button class="mdl-wa" style="background:var(--ink); margin-top: 10px; border:none; cursor:pointer;" onclick="addToCart(cp.sku, null, mq, true); closeModal(); openCheckout();">
         <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" width="22" height="22"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0110 0v4"></path></svg>
         Request Quote on WhatsApp
       </button>
       <div style="display:flex; gap:10px; margin-top:10px;">
-        <button class="mdl-wa" style="flex:1; background:#0D1A12; border:none; cursor:pointer;" onclick="addToCart(cp.sku, null, mq); closeModal();">
+        <button class="mdl-wa" style="flex:1; background:#0D1A12; border:none; cursor:pointer;" onclick="addToCart(cp.sku, null, mq, false); closeModal();">
           <svg viewBox="0 0 24 24" stroke-width="1.8" stroke="white" fill="none" width="20" height="20"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 001.97 1.61h9.72a2 2 0 001.97-1.61L23 6H6"/></svg>
           Add to Cart
         </button>
@@ -869,6 +871,9 @@ footer{background:#040404;padding:80px 56px 0;border-top:1px solid rgba(255,255,
   <div class="cdwr-body" id="cdwr-body"></div>
   <div class="cdwr-foot" id="cdwr-foot" style="display:none">
     <div class="ctot-row"><span class="ctot-l">Estimated Total</span><span class="ctot-v" id="ctot-v">GHS 0</span></div>
+    <button class="csend ccontinue" onclick="closeCart(); scrollTo('products');">
+      Continue Shopping
+    </button>
     <button class="csend" onclick="openCheckout()" style="background:var(--ink); border:none; cursor:pointer;">
       <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" width="19" height="19"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0110 0v4"></path></svg>
       Request Quote
@@ -1251,11 +1256,11 @@ function renderGrid(){
       <div class="qty-v" id="cq-${p.sku}">1</div>
       <button class="qty-b" onclick="cqty('${p.sku}',1,event)">+</button>
     </div>
-    <button class="order-btn" onclick="addToCart('${p.sku}', event, parseInt(document.getElementById('cq-${p.sku}').textContent)); openCheckout();" style="border:none; cursor:pointer;">
+    <button class="order-btn" onclick="addToCart('${p.sku}', event, parseInt(document.getElementById('cq-${p.sku}').textContent), true); openCheckout();" style="border:none; cursor:pointer;">
       <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2.5" width="16" height="16"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0110 0v4"></path></svg>
       Buy Now
     </button>
-    <button class="order-btn add-to-cart-btn" style="background:#0D1A12;" onclick="addToCart('${p.sku}', event)">
+    <button class="order-btn add-to-cart-btn" style="background:#0D1A12;" onclick="addToCart('${p.sku}', event, null, false)">
       Add to List
     </button>
     <button class="detail-btn" onclick="openModal('${p.sku}', event)">
@@ -1349,7 +1354,7 @@ function selectColour(btn, sku, e){
 }
 const selectedColours = {};
 
-function addToCart(sku, e, q=null){
+function addToCart(sku, e, q=null, showDrawer=false){
   if(e) e.stopPropagation();
   const qty = q || parseInt(document.getElementById('cq-'+sku)?.textContent || '1');
   const p = P.find(x=>x.sku===sku);
@@ -1362,7 +1367,8 @@ function addToCart(sku, e, q=null){
   }
   saveCart();
   updBdg();
-  openCart();
+  if(showDrawer) openCart();
+  else showToast(`${p.name} added. You can keep shopping.`, 'success');
 }
 function updBdg(){
   const t=Object.values(cart).reduce((s,i)=>s+i.qty,0);
