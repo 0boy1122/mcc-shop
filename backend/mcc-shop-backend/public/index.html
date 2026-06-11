@@ -461,10 +461,10 @@ footer{background:#040404;padding:80px 56px 0;border-top:1px solid rgba(255,255,
   .pgrid{grid-template-columns:repeat(2,1fr);}
   .pcard-img{aspect-ratio:4/3;}
   .qty-ctrl{display:none;}
-  .add-to-cart-btn{display:none;}
-  .order-btn{flex:1;font-size:11px;padding:11px 8px;border-radius:2px;letter-spacing:.04em;}
+  .add-to-cart-btn{display:flex;}
+  .order-btn{flex:1 1 calc(50% - 4px);min-width:0;font-size:11px;padding:11px 8px;border-radius:2px;letter-spacing:.04em;}
   .detail-btn{display:none;}
-  .pcard-foot{padding:10px 12px 12px;gap:8px;}
+  .pcard-foot{padding:10px 12px 12px;gap:8px;flex-wrap:wrap;}
   .pcard-bulk{font-size:9px;padding:2px 7px;}
 }
 
