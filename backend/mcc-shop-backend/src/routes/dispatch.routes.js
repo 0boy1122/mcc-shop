@@ -2,27 +2,45 @@ const express = require("express");
 const prisma = require("../lib/prisma");
 const multer = require("multer");
 const path = require("path");
+const fs = require("fs");
 const { authenticate, authorize } = require("../middleware/auth.middleware");
 
 const router = express.Router();
 
 // File upload config for delivery proof
-const storage = multer.diskStorage({
-  destination: "uploads/proofs/",
-  filename: (req, file, cb) => {
-    cb(null, `proof-${Date.now()}${path.extname(file.originalname)}`);
-  },
-});
 const ALLOWED_PROOF_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 const upload = multer({
-  storage,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
     if (ALLOWED_PROOF_TYPES.includes(file.mimetype)) return cb(null, true);
     cb(new Error("Only image files are allowed (jpeg, png, webp)"));
   },
 });
+
+async function storeProofImage(file) {
+  const ext = path.extname(file.originalname) || ".jpg";
+  const filename = `proof-${Date.now()}-${Math.random().toString(36).slice(2, 8)}${ext}`;
+
+  if (process.env.BLOB_READ_WRITE_TOKEN) {
+    const { put } = require("@vercel/blob");
+    const blob = await put(`proofs/${filename}`, file.buffer, {
+      access: "public",
+      contentType: file.mimetype,
+    });
+    return blob.url;
+  }
+
+  if (process.env.VERCEL || process.env.NODE_ENV === "production") {
+    return `data:${file.mimetype};base64,${file.buffer.toString("base64")}`;
+  }
+
+  const uploadDir = path.join(__dirname, "../../uploads/proofs");
+  await fs.promises.mkdir(uploadDir, { recursive: true });
+  await fs.promises.writeFile(path.join(uploadDir, filename), file.buffer);
+  return `/uploads/proofs/${filename}`;
+}
 
 // GET /api/dispatch/available  – pending orders for riders to pick up
 router.get("/available", authenticate, authorize("RIDER"), async (req, res, next) => {
@@ -119,7 +137,7 @@ router.post(
       if (!order) return res.status(404).json({ error: "Order not found" });
       if (order.riderId !== rider.id) return res.status(403).json({ error: "Not your order" });
 
-      const proofUrl = `/uploads/proofs/${req.file.filename}`;
+      const proofUrl = await storeProofImage(req.file);
 
       await prisma.dispatchLog.update({
         where: { orderId: req.params.orderId },
