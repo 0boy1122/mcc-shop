@@ -1,7 +1,9 @@
+require("dotenv").config({ path: ".env.production.local" });
+require("dotenv").config();
+
 const required = [
   "DATABASE_URL",
   "JWT_SECRET",
-  "BLOB_READ_WRITE_TOKEN",
 ];
 
 const hasStaffPassword = Boolean(process.env.STAFF_PASSWORD || process.env.ADMIN_PASSWORD);
@@ -22,3 +24,6 @@ if (missing.length) {
 }
 
 console.log("Production env check passed.");
+if (!process.env.BLOB_READ_WRITE_TOKEN) {
+  console.warn("BLOB_READ_WRITE_TOKEN is not set. Product images under 2MB will be stored inline in Postgres.");
+}

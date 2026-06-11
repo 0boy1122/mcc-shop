@@ -7,7 +7,10 @@ const fs = require("fs");
 
 const router = express.Router();
 const uploadDir = path.join(__dirname, "../../uploads/products");
-fs.mkdirSync(uploadDir, { recursive: true });
+const canUseLocalUploads = !process.env.VERCEL && process.env.NODE_ENV !== "production";
+if (canUseLocalUploads) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
 
 // ── Image Upload Setup ─────────────────────────────
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
@@ -34,7 +37,18 @@ async function storeProductImage(file) {
     return blob.url;
   }
 
+  if (process.env.VERCEL || process.env.NODE_ENV === "production") {
+    const maxInlineBytes = 2 * 1024 * 1024;
+    if (file.size > maxInlineBytes) {
+      const err = new Error("Image is too large for inline storage. Configure BLOB_READ_WRITE_TOKEN or upload an image under 2MB.");
+      err.status = 413;
+      throw err;
+    }
+    return `data:${file.mimetype};base64,${file.buffer.toString("base64")}`;
+  }
+
   const filepath = path.join(uploadDir, filename);
+  await fs.promises.mkdir(uploadDir, { recursive: true });
   await fs.promises.writeFile(filepath, file.buffer);
   return `/uploads/products/${filename}`;
 }
